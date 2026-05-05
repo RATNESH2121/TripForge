@@ -1,0 +1,197 @@
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  background: var(--navy-deep);
+}
+
+/* ── Background ── */
+.hero-bg {
+  position: absolute;
+  inset: -12% -5% -15% -5%;
+  z-index: 0;
+}
+.hero-bg-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  will-change: transform;
+}
+.hero-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(8,17,30,0.25) 0%,
+    rgba(8,17,30,0.05) 30%,
+    rgba(8,17,30,0.45) 65%,
+    rgba(8,17,30,0.97) 100%
+  );
+}
+
+/* ── Centered headline ── */
+.hero-content {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 60px;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+.hero-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 0.88;
+  text-align: center;
+  gap: 0;
+}
+
+.hero-word {
+  font-family: var(--font-display);
+  font-size: clamp(68px, 10vw, 130px);
+  font-weight: 400;
+  color: var(--white);
+  letter-spacing: 4px;
+  text-shadow: 0 4px 40px rgba(0,0,0,0.4);
+  display: block;
+  will-change: transform, opacity;
+}
+.hero-word--big {
+  font-size: clamp(110px, 16vw, 210px);
+  letter-spacing: 8px;
+  text-shadow: 0 8px 60px rgba(0,0,0,0.5);
+}
+
+/* ── Bottom Row ── */
+.hero-bottom {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 48px 48px;
+  gap: 24px;
+}
+
+/* Stats */
+.hero-stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 20px;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--r-md);
+  min-width: 130px;
+  transition: background 0.3s;
+}
+.stat-card:hover { background: rgba(255,255,255,0.16); }
+.stat-icon  { font-size: 20px; }
+.stat-value {
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--white);
+  letter-spacing: 1px;
+  line-height: 1;
+}
+.stat-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Featured Destination */
+.hero-featured-wrap { flex-shrink: 0; }
+.hero-featured {
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  max-width: 420px;
+  transition: border-color 0.3s;
+}
+.hero-featured:hover { border-color: rgba(240,192,64,0.4); }
+
+.featured-thumb {
+  width: 130px;
+  height: 120px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.featured-thumb img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s var(--ease);
+}
+.hero-featured:hover .featured-thumb img { transform: scale(1.08); }
+
+.featured-arrow {
+  width: 40px; height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white);
+  color: var(--navy-deep);
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin: 0 12px;
+  transition: transform 0.2s, background 0.2s;
+  border: none;
+  cursor: pointer;
+}
+.featured-arrow:hover {
+  background: var(--accent-gold);
+  transform: scale(1.1);
+}
+
+.featured-info {
+  padding: 14px 16px 14px 0;
+  flex: 1;
+}
+.featured-name {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--white);
+  margin-bottom: 7px;
+  text-transform: uppercase;
+}
+.featured-desc {
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .hero-bottom   { flex-direction: column; align-items: flex-start; padding: 0 20px 32px; }
+  .hero-stats    { gap: 8px; }
+  .stat-card     { min-width: 100px; padding: 12px 14px; }
+  .hero-featured { max-width: 100%; }
+  .hero-word     { font-size: clamp(52px, 13vw, 90px); }
+  .hero-word--big{ font-size: clamp(80px, 18vw, 120px); }
+}

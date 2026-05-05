@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy-deep: #08111e;
+  --color-navy-dark: #0b1628;
+  --color-navy-mid: #0f1f38;
+  --color-navy-light: #172d4f;
+  --color-navy-card: #0d1a2d;
+  
+  --color-accent-gold: #f0c040;
+  --color-accent-gold-dark: #c9a130;
+  --color-accent-pink: #ea4c89;
+  --color-accent-teal: #2dd4c0;
+  --color-accent-blue: #3b82f6;
+
+  --font-display: "Bebas Neue", "Barlow Condensed", sans-serif;
+  --font-heading: "Barlow Condensed", sans-serif;
+  --font-body: "Inter", sans-serif;
+}
+
+/* =============================================
+   TRAIL MAKERS — Global Design System
+   ============================================= */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --navy-deep:   #08111e;
+  --navy-dark:   #0b1628;
+  --navy-mid:    #0f1f38;
+  --navy-light:  #172d4f;
+  --navy-card:   #0d1a2d;
+  --accent-gold: #f0c040;
+  --accent-gold-dark: #c9a130;
+  --accent-pink: #ea4c89;
+  --accent-teal: #2dd4c0;
+  --accent-blue: #3b82f6;
+  --white:       #ffffff;
+  --white-90:    rgba(255,255,255,0.9);
+  --white-70:    rgba(255,255,255,0.7);
+  --white-50:    rgba(255,255,255,0.5);
+  --white-30:    rgba(255,255,255,0.3);
+  --white-15:    rgba(255,255,255,0.15);
+  --white-08:    rgba(255,255,255,0.08);
+
+  --font-display:  'Bebas Neue', 'Barlow Condensed', sans-serif;
+  --font-heading:  'Barlow Condensed', sans-serif;
+  --font-body:     'Inter', sans-serif;
+
+  --r-sm:  8px;
+  --r-md:  14px;
+  --r-lg:  20px;
+  --r-xl:  28px;
+  --r-2xl: 40px;
+  --r-pill: 999px;
+
+  --ease:     cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--navy-deep);
+  color: var(--white);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img { display: block; max-width: 100%; }
+a  { text-decoration: none; color: inherit; }
+button { cursor: pointer; border: none; background: none; font: inherit; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--navy-dark); }
+::-webkit-scrollbar-thumb { background: rgba(240,192,64,0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-gold); }
+
+/* ── Shared Section Utilities ── */
+.section-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3.5px;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.section-tag::before {
+  content: '';
+  display: block;
+  width: 24px; height: 2px;
+  background: var(--accent-gold);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 800;
+  color: var(--white);
+  line-height: 1.1;
+  letter-spacing: 0.5px;
+}
+
+.section-title em {
+  font-style: italic;
+  color: var(--accent-gold);
+}
+
+/* ── Glassmorphic panel ── */
+.glass {
+  background: rgba(13, 26, 45, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1);
+}

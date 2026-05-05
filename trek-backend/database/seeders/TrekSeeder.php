@@ -1,0 +1,163 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use App\Models\Trek;
+
+class TrekSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $treks = [
+            [
+                'title'      => 'Denali Wilderness',
+                'description'=> 'A raw Alaskan wilderness adventure through boreal forests and alpine tundra beneath North America\'s highest peak.',
+                'price'      => 1800,
+                'location'   => 'Alaska, USA',
+                'image'      => '/assets/alaska.png',
+                'duration'   => '3 to 4 days',
+                'difficulty' => 'Moderate',
+                'stars'      => 4,
+                'badge'      => '3-4 days',
+                'featured'   => false,
+            ],
+            [
+                'title'      => 'The Santa Cruz Track',
+                'description'=> 'Trek through the majestic Cordillera Blanca on this iconic Peruvian highland route past turquoise lagoons.',
+                'price'      => 950,
+                'location'   => 'Peru',
+                'image'      => '/assets/santa_cruz.png',
+                'duration'   => '3 to 4 days',
+                'difficulty' => 'Hard',
+                'stars'      => 5,
+                'badge'      => 'HOT',
+                'featured'   => true,
+            ],
+            [
+                'title'      => 'Tour Du Mont Blanc',
+                'description'=> 'Circle the legendary Mont Blanc massif through three countries—France, Italy, and Switzerland—on Europe\'s premier alpine trail.',
+                'price'      => 2200,
+                'location'   => 'Europe',
+                'image'      => '/assets/mont_blanc.png',
+                'duration'   => '7 to 11 days',
+                'difficulty' => 'Hard',
+                'stars'      => 4,
+                'badge'      => '7-11 days',
+                'featured'   => false,
+            ],
+            [
+                'title'      => 'Chame Route',
+                'description'=> 'A breathtaking New Zealand alpine trek offering diverse terrain from lush valleys to dramatic ridge-lines.',
+                'price'      => 4200,
+                'location'   => 'New Zealand',
+                'image'      => '/assets/newzealand.png',
+                'duration'   => '11 days',
+                'difficulty' => 'Moderate',
+                'stars'      => 5,
+                'badge'      => '11 days',
+                'featured'   => false,
+            ],
+            [
+                'title'      => 'Everest Base Camp',
+                'description'=> 'The world\'s most iconic trek, ascending through Sherpa villages, ancient monasteries, and glaciated valleys to the foot of Everest.',
+                'price'      => 3500,
+                'location'   => 'Nepal',
+                'image'      => '/assets/everest.png',
+                'duration'   => '2 weeks',
+                'difficulty' => 'Extreme',
+                'stars'      => 5,
+                'badge'      => '2 weeks',
+                'featured'   => false,
+            ],
+            [
+                'title'      => 'Markha Valley Trek',
+                'description'=> 'Cross dramatic high-altitude passes and explore remote monasteries in the Himalayan desert of Ladakh.',
+                'price'      => 2800,
+                'location'   => 'Ladakh, India',
+                'image'      => '/assets/markha.png',
+                'duration'   => '7 days',
+                'difficulty' => 'Hard',
+                'stars'      => 4,
+                'badge'      => '1 week',
+                'featured'   => false,
+            ],
+            [
+                'title'      => 'Annapurna Circuit',
+                'description'=> 'Circumnavigate the Annapurna massif crossing the legendary Thorong La Pass at 5,416m in the heart of Nepal.',
+                'price'      => 3100,
+                'location'   => 'Nepal',
+                'image'      => '/assets/himalayas.png',
+                'duration'   => '10 days',
+                'difficulty' => 'Extreme',
+                'stars'      => 5,
+                'badge'      => '10 days',
+                'featured'   => false,
+            ],
+            [
+                'title'      => 'Yosemite Valley Camp',
+                'description'=> 'A perfect family adventure exploring the granite cliffs and giant sequoias of Yosemite National Park.',
+                'price'      => 600,
+                'location'   => 'California, USA',
+                'image'      => '/assets/footer_camping.png',
+                'duration'   => '3 days',
+                'difficulty' => 'Easy',
+                'stars'      => 4,
+                'badge'      => 'Family',
+                'featured'   => false,
+            ],
+            [
+                'title'      => 'Blue Mountains Hike',
+                'description'=> 'Discover dramatic sandstone escarpments, ancient Aboriginal rock art, and sweeping valley views outside Sydney.',
+                'price'      => 400,
+                'location'   => 'Australia',
+                'image'      => '/assets/hero_mountain.png',
+                'duration'   => '2 days',
+                'difficulty' => 'Easy',
+                'stars'      => 3,
+                'badge'      => 'Weekend',
+                'featured'   => false,
+            ],
+            [
+                'title'      => 'Banff National Park',
+                'description'=> 'Hike through the turquoise lakes and glacier-carved valleys of Canada\'s most iconic national park.',
+                'price'      => 1200,
+                'location'   => 'Canada',
+                'image'      => '/assets/discount_camping.png',
+                'duration'   => '5 days',
+                'difficulty' => 'Moderate',
+                'stars'      => 4,
+                'badge'      => 'Discount',
+                'featured'   => false,
+            ],
+            [
+                'title'      => 'Patagonia Glacier Trek',
+                'description'=> 'An extreme expedition across the Southern Patagonian Ice Field, one of the world\'s largest non-polar ice reserves.',
+                'price'      => 3800,
+                'location'   => 'Chile/Argentina',
+                'image'      => '/assets/alaska.png',
+                'duration'   => '8 days',
+                'difficulty' => 'Hard',
+                'stars'      => 5,
+                'badge'      => 'Winter',
+                'featured'   => false,
+            ],
+            [
+                'title'      => 'Inca Trail',
+                'description'=> 'Follow the footsteps of the ancient Inca on this mystical 4-day trail culminating at the Sun Gate of Machu Picchu.',
+                'price'      => 1500,
+                'location'   => 'Peru',
+                'image'      => '/assets/santa_cruz.png',
+                'duration'   => '4 days',
+                'difficulty' => 'Hard',
+                'stars'      => 5,
+                'badge'      => 'Remote',
+                'featured'   => false,
+            ],
+        ];
+
+        foreach ($treks as $trek) {
+            Trek::create($trek);
+        }
+    }
+}

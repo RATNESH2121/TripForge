@@ -1,0 +1,114 @@
+.location-search-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.location-search-input-wrap {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 8px 24px;
+  transition: all 0.3s ease;
+}
+
+.location-search-input-wrap.active,
+.location-search-input-wrap:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(240, 192, 64, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.ls-icon {
+  color: rgba(255, 255, 255, 0.5);
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.location-search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  font-family: inherit;
+  padding: 12px 0;
+  outline: none;
+}
+
+.location-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* Dropdown */
+.location-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+  right: 0;
+  background: #0a1628;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 16px 0;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+}
+
+.location-dropdown-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0 24px 8px;
+}
+
+.location-dropdown-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.location-dropdown-list li {
+  display: flex;
+  align-items: center;
+  padding: 14px 24px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.location-dropdown-list li:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ld-icon {
+  font-size: 20px;
+  margin-right: 16px;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ld-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.ld-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.location-dropdown-empty {
+  padding: 20px 24px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 14px;
+}

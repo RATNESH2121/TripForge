@@ -1,0 +1,309 @@
+/* ══════════════════════════════════════════
+   Trek Detail Page
+══════════════════════════════════════════ */
+
+/* Back button */
+.trek-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 28px;
+  margin-bottom: 24px;
+  padding: 8px 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  color: rgba(255,255,255,0.6);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.trek-back-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+/* ── Hero ───────────────────────────────── */
+.trek-hero {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  height: 460px;
+  margin-bottom: 40px;
+  background: rgba(255,255,255,0.03);
+}
+.trek-hero-placeholder {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+.trek-hero-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.trek-hero-img.loaded { opacity: 1; }
+
+.trek-hero-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(6,13,24,0.96) 0%, rgba(6,13,24,0.5) 40%, rgba(6,13,24,0.1) 100%);
+  display: flex; align-items: flex-end;
+  padding: 40px;
+}
+.trek-hero-content { max-width: 720px; }
+
+.trek-badges { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.trek-badge-diff {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.trek-badge-featured {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(240,192,64,0.2);
+  color: #f0c040;
+  border: 1px solid rgba(240,192,64,0.35);
+}
+.trek-badge-tag {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.trek-hero-title {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+  margin-bottom: 14px;
+  font-family: var(--font-heading, 'Barlow Condensed', sans-serif);
+}
+.trek-hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.65);
+  flex-wrap: wrap;
+}
+.trek-meta-dot { opacity: 0.3; }
+.trek-stars-row { display: flex; gap: 2px; }
+
+/* ── Body layout ───────────────────────── */
+.trek-detail-body {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 40px;
+  align-items: start;
+}
+
+/* ── Quick stats ───────────────────────── */
+.trek-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 40px;
+}
+.trek-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 14px;
+  transition: background 0.2s;
+}
+.trek-stat-card:hover { background: rgba(255,255,255,0.05); }
+.trek-stat-icon { font-size: 20px; flex-shrink: 0; }
+.trek-stat-label { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 2px; letter-spacing: 0.3px; }
+.trek-stat-val   { font-size: 14px; font-weight: 700; color: #fff; }
+
+/* ── Sections ──────────────────────────── */
+.trek-section { margin-bottom: 44px; }
+.trek-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.2px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.trek-description {
+  font-size: 15px;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.75;
+}
+
+/* Highlights */
+.trek-highlights { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.trek-highlight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+}
+.trek-check {
+  width: 20px; height: 20px;
+  flex-shrink: 0;
+  background: rgba(45,212,192,0.12);
+  color: #2dd4c0;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 1px;
+}
+
+/* Itinerary */
+.trek-itinerary { display: flex; flex-direction: column; gap: 0; }
+.itinerary-item { display: flex; gap: 16px; }
+.itinerary-day-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+.itinerary-day-badge {
+  width: 60px;
+  padding: 5px 0;
+  text-align: center;
+  background: rgba(240,192,64,0.1);
+  border: 1px solid rgba(240,192,64,0.25);
+  color: #f0c040;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.itinerary-line {
+  width: 1px;
+  flex: 1;
+  background: rgba(255,255,255,0.06);
+  margin: 6px 0;
+  min-height: 24px;
+}
+.itinerary-content { padding-bottom: 28px; }
+.itinerary-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.itinerary-desc { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+/* ── Booking sidebar ───────────────────── */
+.trek-booking-sidebar {
+  position: sticky;
+  top: 80px;
+}
+.trek-booking-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 20px;
+  padding: 28px;
+}
+.booking-card-from { font-size: 12px; color: rgba(255,255,255,0.4); letter-spacing: 0.3px; margin-bottom: 4px; }
+.booking-card-price {
+  font-family: var(--font-heading, 'Barlow Condensed', sans-serif);
+  font-size: 44px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.booking-card-per { font-size: 12px; color: rgba(255,255,255,0.4); }
+.booking-card-divider { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 20px 0; }
+.booking-card-perks { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+.booking-perk {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; color: rgba(255,255,255,0.65);
+}
+.booking-card-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  background: var(--accent-gold, #f0c040);
+  color: var(--navy-deep, #08111e);
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.3s;
+  margin-bottom: 12px;
+}
+.booking-card-btn:hover {
+  background: #e6b520;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(240,192,64,0.35);
+}
+.booking-card-note { font-size: 11px; color: rgba(255,255,255,0.3); text-align: center; line-height: 1.5; }
+
+/* ── Skeleton ──────────────────────────── */
+.trek-detail-skeleton {
+  padding-top: 28px;
+}
+.skeleton-hero {
+  height: 460px;
+  border-radius: 20px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  margin-bottom: 40px;
+}
+.skeleton-body { display: flex; flex-direction: column; gap: 14px; }
+.skeleton-line {
+  height: 16px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+/* ── Error ─────────────────────────────── */
+.trek-detail-error {
+  text-align: center;
+  padding: 100px 20px;
+  color: rgba(255,255,255,0.5);
+}
+.trek-detail-error p { font-size: 16px; margin-bottom: 20px; }
+.trek-detail-error button {
+  padding: 10px 24px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 999px;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+  background: none;
+}
+.trek-detail-error button:hover { background: rgba(255,255,255,0.08); }
+
+/* ── Responsive ────────────────────────── */
+@media (max-width: 1024px) {
+  .trek-detail-body { grid-template-columns: 1fr; }
+  .trek-booking-sidebar { position: static; }
+  .trek-stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .trek-hero { height: 300px; }
+  .trek-hero-overlay { padding: 24px; }
+  .trek-stats-row { grid-template-columns: 1fr 1fr; }
+}
