@@ -8,6 +8,12 @@ import { fetchTreks, setToken, setUser } from '../api';
 import './Packages.css';
 
 const DIFFICULTIES = ['All', 'Easy', 'Moderate', 'Hard', 'Extreme'];
+const BUDGETS = [
+  { label: 'All Budgets', min: 0,    max: Infinity },
+  { label: '< $500',      min: 0,    max: 500 },
+  { label: '$500–$2K',    min: 500,  max: 2000 },
+  { label: '$2K+',        min: 2000, max: Infinity },
+];
 
 const renderStars = (count) => [...Array(5)].map((_, i) => (
   <span key={i} style={{ color: i < count ? 'var(--accent-gold)' : 'rgba(255,255,255,0.15)' }}>★</span>
@@ -20,6 +26,7 @@ export default function Packages() {
   const [filter,      setFilter]      = useState('All');
   const [search,      setSearch]      = useState('');
   const [sort,        setSort]        = useState('default');
+  const [budget,      setBudget]      = useState(0);
   const [selectedPkg, setSelectedPkg] = useState(null);
   const [authOpen,    setAuthOpen]    = useState(false);
 
@@ -34,10 +41,12 @@ export default function Packages() {
   }, []);
 
   // ─── Filter / sort ─────────────────────────────────────────
+  const budgetRange = BUDGETS[budget];
   let data = treks.filter(p => {
     const s = search.toLowerCase();
     return (p.title.toLowerCase().includes(s) || p.location.toLowerCase().includes(s))
-      && (filter === 'All' || p.difficulty === filter);
+      && (filter === 'All' || p.difficulty === filter)
+      && (p.price >= budgetRange.min && p.price < budgetRange.max);
   });
   if (sort === 'price-asc')  data = [...data].sort((a, b) => a.price - b.price);
   if (sort === 'price-desc') data = [...data].sort((a, b) => b.price - a.price);
@@ -48,8 +57,8 @@ export default function Packages() {
       {/* Header */}
       <div className="pkg-header">
         <FadeIn>
-          <p className="section-tag">Adventure Packages</p>
-          <h2 className="section-title">Choose Your <em>Escape</em></h2>
+          <p className="section-tag">Featured Packages</p>
+          <h2 className="section-title">Curated <em>Experiences & Packages</em></h2>
         </FadeIn>
         <FadeIn delay={0.15}>
           <p className="pkg-desc">
@@ -96,6 +105,19 @@ export default function Packages() {
                   onClick={() => setFilter(d)}
                 >
                   {d}
+                </button>
+              ))}
+            </div>
+
+            {/* Budget pills */}
+            <div className="diff-pills">
+              {BUDGETS.map((b, i) => (
+                <button
+                  key={b.label}
+                  className={`diff-pill ${budget === i ? 'active' : ''}`}
+                  onClick={() => setBudget(i)}
+                >
+                  💰 {b.label}
                 </button>
               ))}
             </div>
