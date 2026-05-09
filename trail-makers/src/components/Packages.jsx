@@ -4,7 +4,7 @@ import { StaggerContainer, StaggerItem } from './animations/Stagger';
 import FadeIn from './animations/FadeIn';
 import BookingModal from './BookingModal';
 import AuthModal from './AuthModal';
-import { fetchTreks, setToken, setUser } from '../api';
+import { fetchExperiences, setToken, setUser } from '../api';
 import './Packages.css';
 
 const DIFFICULTIES = ['All', 'Easy', 'Moderate', 'Hard', 'Extreme'];
@@ -30,13 +30,30 @@ export default function Packages({ preview = false }) {
   const [selectedPkg, setSelectedPkg] = useState(null);
   const [authOpen,    setAuthOpen]    = useState(false);
 
-  // ─── Fetch treks from Laravel API ──────────────────────────
+  // ─── Fetch experiences from Laravel API ────────────────────
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetchTreks()
-      .then(data => { if (!cancelled) { setTreks(data); setLoading(false); } })
-      .catch(err  => { if (!cancelled) { setApiError(err.message); setLoading(false); } });
+    fetchExperiences()
+      .then(data => {
+        if (!cancelled) {
+          setTreks(data.map(e => ({
+            id:         e.id,
+            title:      e.title || 'Experience',
+            location:   e.destination?.name || 'Destination',
+            price:      parseFloat(e.price),
+            image:      e.image_url || '/assets/himalayas.png',
+            duration:   `${e.duration_hours}h`,
+            difficulty: 'Moderate',
+            stars:      4,
+            badge:      e.group_size > 5 ? 'GROUP' : null,
+            featured:   false,
+            type:       'experience',
+          })));
+          setLoading(false);
+        }
+      })
+      .catch(err => { if (!cancelled) { setApiError(err.message); setLoading(false); } });
     return () => { cancelled = true; };
   }, []);
 

@@ -1,57 +1,14 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { StaggerContainer, StaggerItem } from './animations/Stagger';
 import FadeIn from './animations/FadeIn';
+import { fetchExperiences } from '../api';
 import './LocalExperiences.css';
 
 const categories = [
   { id: 'tours',    label: '🗺️ Guided Tours',    color: '#3b82f6' },
   { id: 'food',     label: '🍜 Food Walks',       color: '#f59e0b' },
   { id: 'culture',  label: '🏛️ Cultural Events',  color: '#ec4899' },
-];
-
-const experiences = [
-  {
-    id: 1, category: 'tours',
-    title: 'Varanasi Boat at Dawn',
-    description: 'Witness the mesmerizing Ganga Aarti and sunrise over the oldest living city on Earth.',
-    duration: '3 hrs', price: 799, rating: 4.9, reviews: 2341,
-    icon: '🛶', location: 'Varanasi, India', host: 'Raju Guide',
-  },
-  {
-    id: 2, category: 'food',
-    title: 'Old Delhi Street Food Trail',
-    description: 'Bite through history — paranthas, chaat, jalebi and the iconic nihari of Chandni Chowk.',
-    duration: '3 hrs', price: 1299, rating: 4.8, reviews: 1876,
-    icon: '🍛', location: 'Delhi, India', host: 'Foodie Walks Co.',
-  },
-  {
-    id: 3, category: 'culture',
-    title: 'Rajasthani Folk Evening',
-    description: 'Kalbeliya dance, live puppetry and traditional music under the desert stars of Jaisalmer.',
-    duration: '2.5 hrs', price: 1800, rating: 5.0, reviews: 987,
-    icon: '🎭', location: 'Jaisalmer, India', host: 'Desert Arts Collective',
-  },
-  {
-    id: 4, category: 'tours',
-    title: 'Manali Snow Trekking',
-    description: 'Guided snowshoe trek to Solang Valley with local mountain experts. Gear included.',
-    duration: '6 hrs', price: 2499, rating: 4.9, reviews: 1234,
-    icon: '🏔️', location: 'Manali, India', host: 'Peak Adventures',
-  },
-  {
-    id: 5, category: 'food',
-    title: 'Kerala Backwater Cooking',
-    description: 'Cook authentic Kerala cuisine on a traditional houseboat with a local family.',
-    duration: '4 hrs', price: 2200, rating: 4.9, reviews: 765,
-    icon: '🥘', location: 'Alleppey, India', host: 'Nalini\'s Kitchen',
-  },
-  {
-    id: 6, category: 'culture',
-    title: 'Tibetan Thangka Painting',
-    description: 'Learn the ancient art of Thangka from a Tibetan master in the hills of Dharamshala.',
-    duration: '5 hrs', price: 2800, rating: 4.8, reviews: 432,
-    icon: '🎨', location: 'Dharamshala, India', host: 'Tenzin Art Studio',
-  },
 ];
 
 const Stars = ({ n }) => (
@@ -63,7 +20,33 @@ const Stars = ({ n }) => (
 );
 
 export default function LocalExperiences({ preview = false }) {
+  const [experiences, setExperiences] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchExperiences()
+      .then(data => {
+        const catIds = ['tours', 'food', 'culture'];
+        setExperiences(data.map((e, i) => ({
+          id:          e.id,
+          category:    catIds[i % catIds.length],
+          title:       e.title,
+          description: e.description,
+          duration:    `${e.duration_hours} hrs`,
+          price:       parseFloat(e.price),
+          rating:      4.8,
+          reviews:     Math.floor(Math.random() * 2000) + 300,
+          icon:        ['🛶', '🍛', '🎭', '🏔️', '🥘', '🎨'][i % 6],
+          location:    e.destination?.name || 'Destination',
+          host:        e.host?.name || 'Local Host',
+        })));
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
   const displayExp = preview ? experiences.slice(0, 3) : experiences;
+
 
   return (
     <section className="experiences-section" id="experiences">

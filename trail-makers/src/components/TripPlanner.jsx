@@ -1,64 +1,42 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import FadeIn from './animations/FadeIn';
+import { generateTripPlan } from '../api';
 import './TripPlanner.css';
 
 const moods = [
-  { id: 'adventure', label: 'Adventure', icon: '🧗', desc: 'Treks, summits & expeditions' },
-  { id: 'relax',     label: 'Relaxation', icon: '🌅', desc: 'Beaches, spas & serenity' },
-  { id: 'culture',   label: 'Culture',    icon: '🏛️', desc: 'Heritage, art & local life' },
-  { id: 'family',    label: 'Family',     icon: '👨‍👩‍👧‍👦', desc: 'Fun for everyone' },
+  { id: 'Adventure',   label: 'Adventure',  icon: '🧗', desc: 'Treks, summits & expeditions', apiStyle: 'Adventure' },
+  { id: 'Relaxation',  label: 'Relaxation', icon: '🌅', desc: 'Beaches, spas & serenity',      apiStyle: 'Relaxation' },
+  { id: 'Culture',     label: 'Culture',    icon: '🏛️', desc: 'Heritage, art & local life',   apiStyle: 'Culture' },
 ];
 
-const mockPlans = {
-  adventure: {
-    destination: 'Manali → Leh via Rohtang',
-    days: '7 Days',
-    highlights: ['Rohtang Pass Trek', 'Pangong Lake', 'Magnetic Hill', 'Khardung La'],
-    stay: 'Mountain Cabins & Campsites',
-    budget: '₹32,000 – ₹55,000',
-    bestFor: 'Solo & Groups',
-  },
-  relax: {
-    destination: 'Goa → South Goa Beaches',
-    days: '5 Days',
-    highlights: ['Palolem Beach', 'Dudhsagar Falls', 'Sunset Cruise', 'Yoga Retreat'],
-    stay: 'Beachside Resorts',
-    budget: '₹18,000 – ₹40,000',
-    bestFor: 'Couples & Friends',
-  },
-  culture: {
-    destination: 'Rajasthan Circuit',
-    days: '8 Days',
-    highlights: ['Amber Fort', 'Hawa Mahal', 'Mehrangarh Fort', 'Desert Safari'],
-    stay: 'Heritage Havelis',
-    budget: '₹28,000 – ₹65,000',
-    bestFor: 'History Buffs',
-  },
-  family: {
-    destination: 'Ooty → Kodaikanal',
-    days: '6 Days',
-    highlights: ['Botanical Garden', 'Ooty Lake', 'Bryant Park', 'Nilgiri Railway'],
-    stay: 'Family Resorts',
-    budget: '₹22,000 – ₹45,000',
-    bestFor: 'Families with Kids',
-  },
-};
+const BUDGET_LABELS = ['Budget', 'Moderate', 'Luxury'];
 
 export default function TripPlanner() {
-  const [selectedMood, setSelectedMood] = useState('adventure');
-  const [budget, setBudget] = useState(50);
-  const [days, setDays] = useState(7);
-  const [generated, setGenerated] = useState(false);
-  const [generating, setGenerating] = useState(false);
+  const [selectedMood, setSelectedMood] = useState('Adventure');
+  const [budgetIdx,    setBudgetIdx]    = useState(1); // 0=Budget,1=Moderate,2=Luxury
+  const [days,         setDays]         = useState(7);
+  const [plan,         setPlan]         = useState(null);
+  const [generating,   setGenerating]   = useState(false);
+  const [error,        setError]        = useState('');
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     setGenerating(true);
-    setGenerated(false);
-    setTimeout(() => { setGenerating(false); setGenerated(true); }, 1800);
+    setPlan(null);
+    setError('');
+    try {
+      const result = await generateTripPlan({
+        budget: BUDGET_LABELS[budgetIdx],
+        style:  selectedMood,
+        days,
+      });
+      setPlan(result);
+    } catch (err) {
+      setError(err.message || 'Could not generate plan. Please try again.');
+    } finally {
+      setGenerating(false);
+    }
   };
-
-  const plan = mockPlans[selectedMood];
 
   return (
     <section className="planner-section" id="planner">
@@ -87,7 +65,7 @@ export default function TripPlanner() {
                   key={m.id}
                   id={`mood-${m.id}`}
                   className={`mood-btn ${selectedMood === m.id ? 'active' : ''}`}
-                  onClick={() => { setSelectedMood(m.id); setGenerated(false); }}
+                  onClick={() => { setSelectedMood(m.id); setPlan(null); }}
                 >
                   <span className="mood-icon">{m.icon}</span>
                   <span className="mood-label">{m.label}</span>
@@ -102,19 +80,19 @@ export default function TripPlanner() {
           <div className="planner-inputs">
             <div className="planner-input-wrap">
               <label className="planner-input-label">
-                💰 Budget per person: <strong>₹{(budget * 1000).toLocaleString()}</strong>
+                💰 Budget: <strong>{BUDGET_LABELS[budgetIdx]}</strong>
               </label>
               <div className="slider-wrap">
                 <input
                   id="budget-slider"
                   type="range"
-                  min={5} max={200} step={5}
-                  value={budget}
-                  onChange={e => { setBudget(+e.target.value); setGenerated(false); }}
+                  min={0} max={2} step={1}
+                  value={budgetIdx}
+                  onChange={e => { setBudgetIdx(+e.target.value); setPlan(null); }}
                   className="planner-slider"
                 />
                 <div className="slider-labels">
-                  <span>₹5K</span><span>₹1L+</span>
+                  <span>Budget</span><span>Moderate</span><span>Luxury</span>
                 </div>
               </div>
             </div>
@@ -129,7 +107,7 @@ export default function TripPlanner() {
                     key={d}
                     id={`days-${d}`}
                     className={`day-pill ${days === d ? 'active' : ''}`}
-                    onClick={() => { setDays(d); setGenerated(false); }}
+                    onClick={() => { setDays(d); setPlan(null); }}
                   >
                     {d}d
                   </button>
@@ -154,9 +132,14 @@ export default function TripPlanner() {
             )}
           </motion.button>
 
-          {/* Generated Plan */}
+          {/* Error */}
+          {error && (
+            <p style={{ color: '#f87171', textAlign: 'center', marginTop: 16, fontSize: 13 }}>{error}</p>
+          )}
+
+          {/* Generated Plan — uses real API response shape */}
           <AnimatePresence>
-            {generated && (
+            {plan && (
               <motion.div
                 className="plan-result"
                 initial={{ opacity: 0, y: 24, scale: 0.97 }}
@@ -168,35 +151,42 @@ export default function TripPlanner() {
                 <div className="plan-result-header">
                   <div>
                     <p className="plan-result-tag">✅ Your Personalized Itinerary</p>
-                    <h3 className="plan-result-dest">{plan.destination}</h3>
+                    <h3 className="plan-result-dest">{plan.destination?.name || 'Your Destination'}</h3>
+                    <p style={{ fontSize: 12, opacity: 0.5, marginTop: 4 }}>{plan.destination?.country}</p>
                   </div>
                   <div className="plan-result-meta">
-                    <span className="plan-meta-pill">⏱ {plan.days}</span>
-                    <span className="plan-meta-pill">👥 {plan.bestFor}</span>
+                    <span className="plan-meta-pill">⏱ {plan.days} days</span>
+                    <span className="plan-meta-pill">🎯 {plan.style}</span>
                   </div>
                 </div>
 
-                <div className="plan-highlights">
-                  {plan.highlights.map((h, i) => (
-                    <motion.div
-                      key={i}
-                      className="plan-highlight"
-                      initial={{ opacity: 0, x: -16 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                    >
-                      <span className="plan-highlight-num">{String(i+1).padStart(2,'0')}</span>
-                      <span className="plan-highlight-text">{h}</span>
-                    </motion.div>
-                  ))}
-                </div>
+                {plan.experiences?.length > 0 && (
+                  <div className="plan-highlights">
+                    {plan.experiences.map((exp, i) => (
+                      <motion.div
+                        key={i}
+                        className="plan-highlight"
+                        initial={{ opacity: 0, x: -16 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                      >
+                        <span className="plan-highlight-num">{String(i + 1).padStart(2, '0')}</span>
+                        <span className="plan-highlight-text">{exp.title}</span>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
 
                 <div className="plan-footer">
                   <div className="plan-info-row">
-                    <div className="plan-info"><span>🏨</span> {plan.stay}</div>
-                    <div className="plan-info"><span>💰</span> {plan.budget}</div>
+                    {plan.recommended_stay && (
+                      <div className="plan-info"><span>🏨</span> {plan.recommended_stay.name}</div>
+                    )}
+                    {plan.estimated_budget && (
+                      <div className="plan-info"><span>💰</span> ₹{Number(plan.estimated_budget).toLocaleString()}</div>
+                    )}
                   </div>
-                  <button className="btn-primary" id="book-this-plan-btn" style={{fontSize:'13px', padding:'11px 22px'}}>
+                  <button className="btn-primary" id="book-this-plan-btn" style={{ fontSize: '13px', padding: '11px 22px' }}>
                     Book This Plan →
                   </button>
                 </div>
@@ -208,3 +198,4 @@ export default function TripPlanner() {
     </section>
   );
 }
+

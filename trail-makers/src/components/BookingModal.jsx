@@ -4,16 +4,19 @@ import { createBooking, getToken } from '../api';
 import './BookingModal.css';
 
 export default function BookingModal({ isOpen, onClose, packageData, onAuthRequired }) {
-  const [guests,    setGuests]    = useState(1);
-  const [date,      setDate]      = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [loading,   setLoading]   = useState(false);
-  const [error,     setError]     = useState('');
+  const [guests,      setGuests]      = useState(1);
+  const [checkIn,    setCheckIn]     = useState('');
+  const [checkOut,   setCheckOut]    = useState('');
+  const [submitted,  setSubmitted]   = useState(false);
+  const [loading,    setLoading]     = useState(false);
+  const [error,      setError]       = useState('');
 
   if (!isOpen || !packageData) return null;
   const total = packageData.price * guests;
 
-  const handleClose = () => { setSubmitted(false); setGuests(1); setDate(''); setError(''); onClose(); };
+  const handleClose = () => {
+    setSubmitted(false); setGuests(1); setCheckIn(''); setCheckOut(''); setError(''); onClose();
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,7 +31,15 @@ export default function BookingModal({ isOpen, onClose, packageData, onAuthRequi
     setError('');
 
     try {
-      await createBooking({ trek_id: packageData.id, date, guests });
+      // Determine bookable_type from packageData
+      const bookableType = packageData.type === 'stay' ? 'Stay' : 'Experience';
+      await createBooking({
+        bookable_type: bookableType,
+        bookable_id:   packageData.id,
+        check_in_date: checkIn,
+        check_out_date: checkOut || null,
+        guests,
+      });
       setSubmitted(true);
     } catch (err) {
       setError(err.message);
@@ -36,6 +47,7 @@ export default function BookingModal({ isOpen, onClose, packageData, onAuthRequi
       setLoading(false);
     }
   };
+
 
   return (
     <AnimatePresence>
@@ -93,13 +105,22 @@ export default function BookingModal({ isOpen, onClose, packageData, onAuthRequi
 
                 <div className="form-grid">
                   <div className="form-field">
-                    <label>Travel Date</label>
+                    <label>Check-in Date</label>
                     <input
                       type="date"
                       required
-                      value={date}
+                      value={checkIn}
                       min={new Date().toISOString().split('T')[0]}
-                      onChange={e => setDate(e.target.value)}
+                      onChange={e => setCheckIn(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-field">
+                    <label>Check-out Date <span style={{opacity:0.5, fontSize:'11px'}}>(optional)</span></label>
+                    <input
+                      type="date"
+                      value={checkOut}
+                      min={checkIn || new Date().toISOString().split('T')[0]}
+                      onChange={e => setCheckOut(e.target.value)}
                     />
                   </div>
                 </div>

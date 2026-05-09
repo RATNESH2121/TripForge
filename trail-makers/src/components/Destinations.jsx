@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import FadeIn from './animations/FadeIn';
+import api from '../services/api';
 import './Destinations.css';
 
 const categories = [
@@ -12,96 +13,7 @@ const categories = [
   { id: 'nature',    label: '🌿 Nature',      filter: 'nature' },
 ];
 
-const destinations = [
-  {
-    id: 1,
-    name: 'Manali',
-    country: 'India',
-    type: 'mountain',
-    image: '/assets/himalayas.png',
-    startingFrom: 8999,
-    rating: 4.8,
-    reviews: 2341,
-    tags: ['Trekking', 'Snow'],
-  },
-  {
-    id: 2,
-    name: 'Everest Region',
-    country: 'Nepal',
-    type: 'mountain',
-    image: '/assets/everest.png',
-    startingFrom: 45000,
-    rating: 4.9,
-    reviews: 1892,
-    tags: ['Epic', 'Base Camp'],
-  },
-  {
-    id: 3,
-    name: 'Goa Beaches',
-    country: 'India',
-    type: 'beach',
-    image: '/assets/santa_cruz.png',
-    startingFrom: 5999,
-    rating: 4.7,
-    reviews: 5672,
-    tags: ['Beach', 'Nightlife'],
-  },
-  {
-    id: 4,
-    name: 'Patagonia',
-    country: 'Chile',
-    type: 'nature',
-    image: '/assets/alaska.png',
-    startingFrom: 89000,
-    rating: 4.9,
-    reviews: 891,
-    tags: ['Glacier', 'Remote'],
-  },
-  {
-    id: 5,
-    name: 'Ladakh',
-    country: 'India',
-    type: 'hidden',
-    image: '/assets/markha.png',
-    startingFrom: 12999,
-    rating: 4.8,
-    reviews: 3210,
-    tags: ['Hidden Gem', 'Desert'],
-  },
-  {
-    id: 6,
-    name: 'Mont Blanc',
-    country: 'France',
-    type: 'mountain',
-    image: '/assets/mont_blanc.png',
-    startingFrom: 55000,
-    rating: 4.8,
-    reviews: 1456,
-    tags: ['Alps', 'Summit'],
-  },
-  {
-    id: 7,
-    name: 'New Zealand',
-    country: 'NZ',
-    type: 'nature',
-    image: '/assets/newzealand.png',
-    startingFrom: 70000,
-    rating: 4.9,
-    reviews: 2087,
-    tags: ['Adventure', 'Scenic'],
-  },
-  {
-    id: 8,
-    name: 'Inca Trail',
-    country: 'Peru',
-    type: 'hidden',
-    image: '/assets/santa_cruz.png',
-    startingFrom: 35000,
-    rating: 4.9,
-    reviews: 1204,
-    tags: ['Heritage', 'Trek'],
-  },
-];
+// We'll load these from the API now
 
 const Stars = ({ n }) => (
   <div className="stars">
@@ -113,7 +25,40 @@ const Stars = ({ n }) => (
 
 export default function Destinations({ preview = false }) {
   const [active, setActive] = useState('all');
+  const [destinations, setDestinations] = useState([]);
+  const [loading, setLoading] = useState(true);
   const scrollRef = useRef(null);
+
+  useEffect(() => {
+    const fetchDestinations = async () => {
+      try {
+        const response = await api.get('/destinations');
+        // Map API data to UI requirements
+        const mappedData = response.data.map((d, index) => {
+           // Assign some fake UI properties based on index to keep the visual design
+           const types = ['mountain', 'beach', 'city', 'hidden', 'nature'];
+           return {
+             id: d.id,
+             name: d.name,
+             country: d.country,
+             type: types[index % types.length],
+             image: d.image_url || '/assets/himalayas.png',
+             startingFrom: 5000 + (index * 1000),
+             rating: (4.0 + (index % 10) / 10).toFixed(1),
+             reviews: 100 + (index * 45),
+             tags: d.best_time_to_visit ? [d.best_time_to_visit, 'Scenic'] : ['Trek', 'Scenic']
+           };
+        });
+        setDestinations(mappedData);
+      } catch (error) {
+        console.error('Failed to load destinations:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDestinations();
+  }, []);
 
   const filtered = active === 'all'
     ? destinations
@@ -168,8 +113,11 @@ export default function Destinations({ preview = false }) {
 
         {/* Cards */}
         <div className="dest-track" ref={scrollRef}>
-          <AnimatePresence mode="popLayout">
-            {displayData.map((d, i) => (
+          {loading ? (
+             <div style={{ color: 'white', padding: '2rem' }}>Loading destinations...</div>
+          ) : (
+            <AnimatePresence mode="popLayout">
+              {displayData.map((d, i) => (
               <motion.div
                 key={d.id}
                 className="dest-card"
@@ -215,7 +163,8 @@ export default function Destinations({ preview = false }) {
                 </div>
               </motion.div>
             ))}
-          </AnimatePresence>
+            </AnimatePresence>
+          )}
         </div>
 
         <button className="dest-scroll-btn dest-scroll-btn--right" onClick={() => scroll(1)} aria-label="Scroll right">

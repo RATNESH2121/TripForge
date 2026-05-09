@@ -1,16 +1,16 @@
 // Central API config — all requests go through here
 const BASE_URL = 'http://127.0.0.1:8000/api';
 
-// ─── Token helpers ─────────────────────────────────────────────────────────
-export const getToken   = ()    => localStorage.getItem('trek_token');
-export const setToken   = (tok) => localStorage.setItem('trek_token', tok);
-export const removeToken = ()   => localStorage.removeItem('trek_token');
+// ─── Token / User helpers ──────────────────────────────────────────────────
+export const getToken    = ()    => localStorage.getItem('trek_token');
+export const setToken    = (tok) => localStorage.setItem('trek_token', tok);
+export const removeToken = ()    => localStorage.removeItem('trek_token');
 
-export const getUser    = ()    => {
+export const getUser  = () => {
   try { return JSON.parse(localStorage.getItem('trek_user')); } catch { return null; }
 };
-export const setUser    = (u)   => localStorage.setItem('trek_user', JSON.stringify(u));
-export const removeUser = ()    => localStorage.removeItem('trek_user');
+export const setUser    = (u) => localStorage.setItem('trek_user', JSON.stringify(u));
+export const removeUser = ()  => localStorage.removeItem('trek_user');
 
 // ─── Core fetcher ──────────────────────────────────────────────────────────
 async function api(path, options = {}) {
@@ -22,11 +22,19 @@ async function api(path, options = {}) {
     ...options.headers,
   };
 
-  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
-  const data = await res.json();
+  let res;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+  } catch (networkErr) {
+    throw new Error('Cannot connect to server. Is the backend running on port 8000?');
+  }
+
+  // Handle 204 No Content (logout etc.)
+  if (res.status === 204) return {};
+
+  const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    // Surface Laravel validation messages cleanly
     const msg =
       data?.message ||
       Object.values(data?.errors || {}).flat().join(' ') ||
@@ -47,41 +55,45 @@ export const authLogin = (body) =>
 export const authLogout = () =>
   api('/logout', { method: 'POST' });
 
-// ─── Experiences (Treks) ───────────────────────────────────────────────────
-export const fetchTreks   = ()   => api('/treks');
-export const fetchTrek    = (id) => api(`/treks/${id}`);
+export const fetchMe = () => api('/user');
+
+// ─── Destinations ──────────────────────────────────────────────────────────
+export const fetchDestinations = ()   => api('/destinations');
+export const fetchDestination  = (id) => api(`/destinations/${id}`);
+
+// Aliases used by older components
+export const fetchTreks  = fetchDestinations;
+export const fetchTrek   = fetchDestination;
+
+// ─── Stays ─────────────────────────────────────────────────────────────────
+export const fetchStays = (params = {}) => {
+  const qs = new URLSearchParams(params).toString();
+  return api(`/stays${qs ? '?' + qs : ''}`);
+};
+export const fetchStay = (id) => api(`/stays/${id}`);
+
+// ─── Experiences ───────────────────────────────────────────────────────────
+export const fetchExperiences = () => api('/experiences');
+export const fetchExperience  = (id) => api(`/experiences/${id}`);
+
+// Alias used by older components
+export const fetchLocations = fetchDestinations;
+export const fetchLocation  = fetchDestination;
 
 // ─── Bookings ──────────────────────────────────────────────────────────────
-export const createBooking = (body) =>
+/**
+ * body: { bookable_type: 'Stay'|'Experience', bookable_id, check_in_date, check_out_date?, guests }
+ */
+export const createBooking   = (body) =>
   api('/bookings', { method: 'POST', body: JSON.stringify(body) });
 
 export const fetchMyBookings = () => api('/my-bookings');
 
-// ─── Mock Data Fetchers (Locations & Stays) ────────────────────────────────
-import { locationsData, staysData } from './data/mockData';
+// ─── AI Trip Planner ───────────────────────────────────────────────────────
+/**
+ * body: { budget: 'Budget'|'Moderate'|'Luxury', style: 'Adventure'|'Relaxation'|'Culture', days }
+ */
+export const generateTripPlan = (body) =>
+  api('/ai-planner/generate', { method: 'POST', body: JSON.stringify(body) });
 
-export const fetchLocations = async () => {
-  return new Promise(resolve => setTimeout(() => resolve(locationsData), 400));
-};
 
-export const fetchLocation = async (slug) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const loc = locationsData.find(l => l.slug === slug);
-      if (loc) resolve(loc);
-      else reject(new Error('Location not found'));
-    }, 400);
-  });
-};
-
-export const fetchStays = async (locationSlug = null) => {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      if (locationSlug) {
-        resolve(staysData.filter(s => s.location_slug === locationSlug));
-      } else {
-        resolve(staysData);
-      }
-    }, 400);
-  });
-};

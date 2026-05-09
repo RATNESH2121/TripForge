@@ -1,37 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StaggerContainer, StaggerItem } from './animations/Stagger';
 import FadeIn from './animations/FadeIn';
+import { fetchStays } from '../api';
 import './HotelsStays.css';
 
 const stayTypes = ['Hotels', 'Hostels', 'Homestays'];
-
-const stays = {
-  Hotels: [
-    { id: 1, name: 'The Himalayan Retreat', location: 'Manali, India', image: '/assets/himalayas.png', pricePerNight: 4500, rating: 4.9, reviews: 1243, amenities: ['WiFi', 'Spa', 'Pool'], badge: 'Guest Favourite' },
-    { id: 2, name: 'Snow Peak Lodge',        location: 'Auli, India',   image: '/assets/alaska.png',    pricePerNight: 3800, rating: 4.7, reviews: 876,  amenities: ['WiFi', 'Breakfast', 'View'] },
-    { id: 3, name: 'Mont Blanc Chateau',     location: 'Chamonix, France', image: '/assets/mont_blanc.png', pricePerNight: 12500, rating: 4.8, reviews: 542, amenities: ['WiFi', 'Spa', 'Ski-in'], badge: 'Luxury' },
-    { id: 4, name: 'Pacific Heights Hotel',  location: 'Queenstown, NZ', image: '/assets/newzealand.png', pricePerNight: 9200, rating: 4.9, reviews: 698, amenities: ['Pool', 'Gym', 'View'] },
-    { id: 5, name: 'Canyon Valley Resort',   location: 'Ladakh, India',  image: '/assets/markha.png', pricePerNight: 5500, rating: 4.8, reviews: 923, amenities: ['WiFi', 'Helipad', 'Bonfire'] },
-    { id: 6, name: 'Desert Sun Hotel',       location: 'Jaisalmer, India', image: '/assets/discount_camping.png', pricePerNight: 2800, rating: 4.6, reviews: 1122, amenities: ['WiFi', 'Pool', 'Cultural'] },
-  ],
-  Hostels: [
-    { id: 7,  name: 'The Summit Hostel',   location: 'Rishikesh, India', image: '/assets/everest.png',  pricePerNight: 950,  rating: 4.7, reviews: 3421, amenities: ['WiFi', 'Kitchen', 'Tours'] },
-    { id: 8,  name: 'Base Camp Bunk',      location: 'Pokhara, Nepal',   image: '/assets/himalayas.png',pricePerNight: 600,  rating: 4.6, reviews: 2187, amenities: ['WiFi', 'Dorm', 'Cafe'] },
-    { id: 9,  name: 'Wayfarers Den',       location: 'Mcleod Ganj, India', image: '/assets/markha.png', pricePerNight: 750, rating: 4.8, reviews: 1876, amenities: ['WiFi', 'Yoga', 'Terrace'], badge: 'Top Rated' },
-    { id: 10, name: 'Patagonia Bunks',     location: 'Torres Del Paine', image: '/assets/alaska.png',   pricePerNight: 2200, rating: 4.9, reviews: 432, amenities: ['WiFi', 'Meals', 'Trek'] },
-    { id: 11, name: 'Kiwi Backpackers',    location: 'Queenstown, NZ',   image: '/assets/newzealand.png',pricePerNight: 1800, rating: 4.7, reviews: 876, amenities: ['WiFi', 'Kitchen', 'Bar'] },
-    { id: 12, name: 'Alps Social House',   location: 'Zermatt, Switzerland', image: '/assets/mont_blanc.png', pricePerNight: 3200, rating: 4.8, reviews: 654, amenities: ['WiFi', 'Sauna', 'Ski'] },
-  ],
-  Homestays: [
-    { id: 13, name: 'Rishi Dada\'s Farmstay', location: 'Coorg, India',    image: '/assets/discount_camping.png', pricePerNight: 2200, rating: 4.9, reviews: 876,  amenities: ['Meals', 'Farm', 'WiFi'], badge: 'Superhost' },
-    { id: 14, name: 'Tibetan Family Home',    location: 'Leh, India',       image: '/assets/markha.png',           pricePerNight: 1800, rating: 4.8, reviews: 1243, amenities: ['Meals', 'Culture', 'Views'] },
-    { id: 15, name: 'Swiss Chalet Stay',      location: 'Grindelwald, CH',  image: '/assets/mont_blanc.png',       pricePerNight: 9500, rating: 4.9, reviews: 654,  amenities: ['WiFi', 'Sauna', 'Panorama'] },
-    { id: 16, name: 'Sherpa Village Home',    location: 'Namche, Nepal',    image: '/assets/everest.png',          pricePerNight: 1200, rating: 5.0, reviews: 321,  amenities: ['Meals', 'Guide', 'Trek'], badge: 'Superhost' },
-    { id: 17, name: 'Maori Cultural Stay',    location: 'Rotorua, NZ',      image: '/assets/newzealand.png',       pricePerNight: 5500, rating: 4.8, reviews: 432,  amenities: ['Culture', 'Meals', 'WiFi'] },
-    { id: 18, name: 'Andean Highland Home',   location: 'Cusco, Peru',      image: '/assets/santa_cruz.png',      pricePerNight: 2800, rating: 4.7, reviews: 765,  amenities: ['Meals', 'Trek', 'Culture'] },
-  ],
-};
 
 const Stars = ({ n }) => (
   <div className="stars">
@@ -43,8 +17,39 @@ const Stars = ({ n }) => (
 
 export default function HotelsStays({ preview = false, embedded = false }) {
   const [activeType, setActiveType] = useState('Hotels');
-  const [wishlist, setWishlist] = useState([]);
-  const currentStays = stays[activeType];
+  const [allStays,   setAllStays]   = useState([]);
+  const [loading,    setLoading]    = useState(true);
+  const [wishlist,   setWishlist]   = useState([]);
+
+  useEffect(() => {
+    fetchStays()
+      .then(data => {
+        setAllStays(data.map(s => ({
+          id:           s.id,
+          name:         s.name,
+          location:     s.location || s.destination?.name || '',
+          image:        s.image_url || '/assets/himalayas.png',
+          pricePerNight: parseFloat(s.price_per_night),
+          rating:       parseFloat(s.rating),
+          reviews:      Math.floor(Math.random() * 1000) + 100,
+          amenities:    s.amenities || [],
+          type:         s.type,
+        })));
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  // Group stays by type for the tabs
+  const groupedStays = {
+    Hotels:    allStays.filter(s => s.type === 'Hotel'),
+    Hostels:   allStays.filter(s => s.type === 'Hostel'),
+    Homestays: allStays.filter(s => s.type === 'Homestay'),
+  };
+  // Fallback: if API data doesn't split evenly, show all stays for all tabs
+  const currentStays = groupedStays[activeType]?.length > 0
+    ? groupedStays[activeType]
+    : allStays;
   const displayStays = preview ? currentStays.slice(0, 3) : currentStays;
 
   const toggleWishlist = (e, id) => {

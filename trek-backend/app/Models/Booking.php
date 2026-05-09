@@ -9,23 +9,21 @@ class Booking extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'trek_id', 'date', 'guests'];
+    protected $fillable = ['user_id', 'bookable_type', 'bookable_id', 'check_in_date', 'check_out_date', 'guests', 'total_price', 'status'];
 
-    protected function casts(): array
-    {
-        return [
-            'date'   => 'date',
-            'guests' => 'integer',
-        ];
-    }
+    protected $casts = [
+        'check_in_date' => 'date',
+        'check_out_date' => 'date',
+        'total_price' => 'decimal:2',
+    ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function trek()
+    public function bookable()
     {
-        return $this->belongsTo(Trek::class);
+        return $this->morphTo();
     }
 }

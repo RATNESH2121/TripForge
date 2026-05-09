@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { fetchTreks, fetchStays } from '../api';
+import { fetchStays, fetchExperiences } from '../api';
 import StayCard from '../components/StayCard';
 import '../components/Packages.css';
 import '../components/dashboard/Dashboard.css';
@@ -21,7 +21,7 @@ export default function ExplorePage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   
-  const [treks, setTreks] = useState([]);
+  const [experiences, setExperiences] = useState([]);
   const [stays, setStays] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -33,10 +33,26 @@ export default function ExplorePage() {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([fetchTreks(), fetchStays()])
-      .then(([treksData, staysData]) => {
-        setTreks(treksData.map(t => ({ ...t, type: 'experience' })));
-        setStays(staysData.map(s => ({ ...s, type: 'stay', title: s.name, price: s.price_per_night, stars: Math.round(s.rating) })));
+    Promise.all([fetchStays(), fetchExperiences()])
+      .then(([staysData, expData]) => {
+        setStays(staysData.map(s => ({
+          ...s,
+          type: 'stay',
+          title: s.name,
+          price: s.price_per_night,
+          stars: Math.round(s.rating || 4),
+        })));
+        setExperiences(expData.map(e => ({
+          ...e,
+          type: 'experience',
+          title: e.title,
+          price: e.price,
+          stars: 4,
+          location: e.destination?.name || '',
+          duration: `${e.duration_hours}h`,
+          difficulty: 'Moderate',
+          image: e.image_url,
+        })));
         setLoading(false);
       })
       .catch(err => {
@@ -44,6 +60,7 @@ export default function ExplorePage() {
         setLoading(false);
       });
   }, []);
+
 
   // Sync tab with URL
   useEffect(() => {
@@ -61,9 +78,9 @@ export default function ExplorePage() {
   };
 
   let combinedData = [];
-  if (activeTab === 'all') combinedData = [...stays, ...treks];
+  if (activeTab === 'all') combinedData = [...stays, ...experiences];
   else if (activeTab === 'stays') combinedData = stays;
-  else if (activeTab === 'experiences') combinedData = treks;
+  else if (activeTab === 'experiences') combinedData = experiences;
 
   let filteredData = combinedData.filter(p => {
     const s = search.toLowerCase();

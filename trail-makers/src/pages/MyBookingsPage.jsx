@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchMyBookings, fetchTreks } from '../api';
+import { fetchMyBookings } from '../api';
 import '../components/dashboard/Dashboard.css';
 import './MyBookingsPage.css';
 
@@ -13,29 +13,29 @@ const isUpcoming = (dateStr) => dateStr && new Date(dateStr) >= new Date();
 export default function MyBookingsPage() {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
-  const [treks,    setTreks]    = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [tab,      setTab]      = useState('upcoming');
 
   useEffect(() => {
-    Promise.all([fetchMyBookings(), fetchTreks()])
-      .then(([b, t]) => { setBookings(b); setTreks(t); setLoading(false); })
+    fetchMyBookings()
+      .then(b => { setBookings(b); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
 
-  const getTrekData = (booking) => {
-    const trek = treks.find(t => t.id === booking.trek_id);
+  // Helper: extract display info from polymorphic bookable
+  const getBookableData = (booking) => {
+    const b = booking.bookable || {};
     return {
-      title:    trek?.title    || booking.trek?.title    || 'Trek',
-      image:    trek?.image    || booking.trek?.image    || 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=200&q=80',
-      location: trek?.location || booking.trek?.location || '',
-      id:       trek?.id       || booking.trek_id,
+      title:    b.name || b.title || 'Booking',
+      image:    b.image_url || 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=200&q=80',
+      location: b.location || b.destination?.name || '',
     };
   };
 
-  const upcoming = bookings.filter(b => isUpcoming(b.travel_date));
-  const past      = bookings.filter(b => !isUpcoming(b.travel_date));
+  const upcoming = bookings.filter(b => isUpcoming(b.check_in_date));
+  const past      = bookings.filter(b => !isUpcoming(b.check_in_date));
   const shown     = tab === 'upcoming' ? upcoming : past;
+
 
   return (
     <div style={{ paddingTop: 40 }}>
@@ -103,18 +103,17 @@ export default function MyBookingsPage() {
       {!loading && shown.length > 0 && (
         <div className="mybookings-full-grid">
           {shown.map(booking => {
-            const { title, image, location, id } = getTrekData(booking);
-            const upcoming = isUpcoming(booking.travel_date);
+            const { title, image, location } = getBookableData(booking);
+            const isUp = isUpcoming(booking.check_in_date);
             return (
               <div
                 key={booking.id}
-                className={`mybooking-card ${upcoming ? 'upcoming' : 'past'}`}
-                onClick={() => id && navigate(`/trek/${id}`)}
+                className={`mybooking-card ${isUp ? 'upcoming' : 'past'}`}
               >
                 <div className="mybooking-img-wrap">
                   <img src={image} alt={title} className="mybooking-img" />
-                  <span className={`mybooking-status-badge ${upcoming ? 'confirmed' : 'past'}`}>
-                    {upcoming ? '✓ Confirmed' : 'Completed'}
+                  <span className={`mybooking-status-badge ${isUp ? 'confirmed' : 'past'}`}>
+                    {isUp ? '✓ Confirmed' : 'Completed'}
                   </span>
                 </div>
                 <div className="mybooking-info">
@@ -122,9 +121,15 @@ export default function MyBookingsPage() {
                   {location && <p className="mybooking-loc">📍 {location}</p>}
                   <div className="mybooking-meta-row">
                     <div className="mybooking-meta-item">
-                      <span className="mybooking-meta-label">Date</span>
-                      <span className="mybooking-meta-val">📅 {formatDate(booking.travel_date)}</span>
+                      <span className="mybooking-meta-label">Check-in</span>
+                      <span className="mybooking-meta-val">📅 {formatDate(booking.check_in_date)}</span>
                     </div>
+                    {booking.check_out_date && (
+                      <div className="mybooking-meta-item">
+                        <span className="mybooking-meta-label">Check-out</span>
+                        <span className="mybooking-meta-val">📅 {formatDate(booking.check_out_date)}</span>
+                      </div>
+                    )}
                     <div className="mybooking-meta-item">
                       <span className="mybooking-meta-label">Guests</span>
                       <span className="mybooking-meta-val">👥 {booking.guests}</span>
@@ -132,20 +137,23 @@ export default function MyBookingsPage() {
                     <div className="mybooking-meta-item">
                       <span className="mybooking-meta-label">Total Paid</span>
                       <span className="mybooking-meta-val" style={{ color: '#f0c040', fontWeight: 700 }}>
-                        ${Number(booking.total_price ?? 0).toLocaleString()}
+                        ₹{Number(booking.total_price ?? 0).toLocaleString()}
                       </span>
                     </div>
                   </div>
-                  <button
-                    className="mybooking-view-btn"
-                    onClick={e => { e.stopPropagation(); id && navigate(`/trek/${id}`); }}
-                  >
-                    View Trek →
-                  </button>
+                  <span className={`mybooking-status-text`} style={{
+                    display: 'inline-block', marginTop: 8, padding: '4px 10px',
+                    borderRadius: 99, fontSize: 11, fontWeight: 700,
+                    background: booking.status === 'confirmed' ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.08)',
+                    color: booking.status === 'confirmed' ? '#4ade80' : '#aaa',
+                  }}>
+                    {booking.status?.toUpperCase()}
+                  </span>
                 </div>
               </div>
             );
           })}
+
         </div>
       )}
     </div>

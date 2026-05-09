@@ -5,7 +5,7 @@ import RecommendedExperiences from '../components/dashboard/RecommendedTreks';
 import MyBookings from '../components/dashboard/MyBookings';
 import BookingModal from '../components/BookingModal';
 import LocationSearch from '../components/LocationSearch';
-import { fetchTreks, fetchMyBookings, fetchLocations } from '../api';
+import { fetchDestinations, fetchExperiences, fetchMyBookings } from '../api';
 
 export default function DashboardPage({ user }) {
   const navigate = useNavigate();
@@ -16,8 +16,27 @@ export default function DashboardPage({ user }) {
   const [selectedPkg,    setSelectedPkg]    = useState(null);
 
   useEffect(() => {
-    fetchTreks().then(setExperiences).catch(() => {});
-    fetchLocations().then(data => setLocations(data.filter(l => l.popular))).catch(() => {});
+    fetchExperiences()
+      .then(data => setExperiences(data.map(e => ({
+        ...e,
+        title: e.title,
+        price: e.price,
+        image: e.image_url,
+        location: e.destination?.name || '',
+        duration: `${e.duration_hours}h`,
+        difficulty: 'Moderate',
+        stars: 4,
+      }))))
+      .catch(() => {});
+
+    fetchDestinations()
+      .then(data => setLocations(data.slice(0, 6).map(d => ({
+        ...d,
+        image: d.image_url,
+        description: d.description,
+        slug: String(d.id), // use ID as slug since we no longer have slugs
+      }))))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
