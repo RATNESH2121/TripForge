@@ -98,10 +98,15 @@ body {
   background: var(--navy-deep);
   color: var(--white);
   font-family: var(--font-body);
-  line-height: 1.6;
+  line-height: 1.65;
+  font-size: 15px;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+p {
+  color: var(--white-70);
 }
 
 img { display: block; max-width: 100%; }
@@ -141,11 +146,11 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 
 .section-title {
   font-family: var(--font-heading);
-  font-size: clamp(28px, 3.5vw, 48px);
+  font-size: clamp(32px, 4vw, 56px);
   font-weight: 800;
   color: var(--white);
-  line-height: 1.15;
-  letter-spacing: -0.5px;
+  line-height: 1.1;
+  letter-spacing: -1px;
 }
 
 .section-title em {
@@ -227,9 +232,17 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 
 /* ── Section wrapper ── */
 .section-wrap {
-  max-width: 1280px;
+  max-width: 1320px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 32px;
+}
+
+/* ── Section Dividers ── */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08) 50%, transparent);
+  border: none;
+  margin: 0;
 }
 
 /* ── Shimmer Skeleton ── */

@@ -111,7 +111,7 @@ const Stars = ({ n }) => (
   </div>
 );
 
-export default function Destinations() {
+export default function Destinations({ preview = false }) {
   const [active, setActive] = useState('all');
   const scrollRef = useRef(null);
 
@@ -122,6 +122,8 @@ export default function Destinations() {
   const scroll = (dir) => {
     scrollRef.current?.scrollBy({ left: dir * 300, behavior: 'smooth' });
   };
+
+  const displayData = preview ? filtered.slice(0, 4) : filtered;
 
   return (
     <section className="destinations-section" id="destinations">
@@ -167,7 +169,7 @@ export default function Destinations() {
         {/* Cards */}
         <div className="dest-track" ref={scrollRef}>
           <AnimatePresence mode="popLayout">
-            {filtered.map((d, i) => (
+            {displayData.map((d, i) => (
               <motion.div
                 key={d.id}
                 className="dest-card"
@@ -222,6 +224,17 @@ export default function Destinations() {
           </svg>
         </button>
       </div>
+
+      {preview && (
+        <FadeIn delay={0.3} className="dest-view-all" style={{ display: 'flex', justifyContent: 'center', marginTop: '32px' }}>
+          <a href="/destinations" className="btn-ghost" id="dest-view-all-btn">
+            Explore All Destinations
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ marginLeft: '6px' }}>
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+            </svg>
+          </a>
+        </FadeIn>
+      )}
     </section>
   );
 }

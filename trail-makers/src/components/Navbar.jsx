@@ -1,24 +1,27 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link, useLocation } from 'react-router-dom';
 import AuthModal from './AuthModal';
 import { getUser, removeToken, removeUser, authLogout } from '../api';
 import './Navbar.css';
 
 const navLinks = [
-  { label: 'Destinations', href: '#destinations' },
-  { label: 'Stays',        href: '#stays' },
-  { label: 'Experiences',  href: '#experiences' },
-  { label: 'Packages',     href: '#packages' },
-  { label: 'Deals',        href: '#deals' },
+  { label: 'Home',         href: '/' },
+  { label: 'Destinations', href: '/destinations' },
+  { label: 'Stays',        href: '/stays' },
+  { label: 'Experiences',  href: '/experiences' },
+  { label: 'Trip Planner', href: '/trip-planner' },
+  { label: 'Offers',       href: '/offers' },
+  { label: 'About',        href: '/about' },
 ];
 
 export default function Navbar() {
   const [scrolled,  setScrolled]  = useState(false);
   const [menuOpen,  setMenuOpen]  = useState(false);
-  const [active,    setActive]    = useState('');
   const [authOpen,  setAuthOpen]  = useState(false);
   const [user,      setUser]      = useState(getUser());
   const [userMenu,  setUserMenu]  = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -32,12 +35,6 @@ export default function Navbar() {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  const go = (label, href) => {
-    setActive(label);
-    setMenuOpen(false);
-    document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   const handleLogout = async () => {
     try { await authLogout(); } catch (_) {}
     removeToken(); removeUser(); setUser(null); setUserMenu(false);
@@ -49,7 +46,7 @@ export default function Navbar() {
         <div className="nav-container">
 
           {/* Logo */}
-          <a href="#hero" className="nav-logo" onClick={() => { setActive(''); setMenuOpen(false); }}>
+          <Link to="/" className="nav-logo" onClick={() => setMenuOpen(false)}>
             <div className="logo-icon">
               <svg width="22" height="22" viewBox="0 0 34 34" fill="none">
                 <path d="M17 4L5 28H29L17 4Z" fill="white" opacity="0.95"/>
@@ -66,26 +63,30 @@ export default function Navbar() {
               <span className="logo-name">TRIP</span>
               <span className="logo-sub">FORGE</span>
             </div>
-          </a>
+          </Link>
 
           {/* Desktop Links */}
           <ul className={`nav-links ${menuOpen ? 'open' : ''}`}>
-            {navLinks.map(({ label, href }) => (
-              <li key={label}>
-                <button
-                  className={`nav-link ${active === label ? 'active' : ''}`}
-                  onClick={() => go(label, href)}
-                >
-                  {label}
-                  {active === label && <motion.span className="nav-dot" layoutId="navDot" />}
-                </button>
-              </li>
-            ))}
+            {navLinks.map(({ label, href }) => {
+              const isActive = location.pathname === href;
+              return (
+                <li key={label}>
+                  <Link
+                    to={href}
+                    className={`nav-link ${isActive ? 'active' : ''}`}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {label}
+                    {isActive && <motion.span className="nav-dot" layoutId="navDot" />}
+                  </Link>
+                </li>
+              );
+            })}
             <li className="nav-link-separator" />
             <li>
-              <a href="#packages" className="nav-link-list" onClick={() => setMenuOpen(false)}>
-                List Property
-              </a>
+              <Link to="/contact" className="nav-link-list" onClick={() => setMenuOpen(false)}>
+                Contact
+              </Link>
             </li>
           </ul>
 

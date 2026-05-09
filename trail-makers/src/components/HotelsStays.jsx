@@ -41,32 +41,43 @@ const Stars = ({ n }) => (
   </div>
 );
 
-export default function HotelsStays() {
+export default function HotelsStays({ preview = false, embedded = false }) {
   const [activeType, setActiveType] = useState('Hotels');
+  const [wishlist, setWishlist] = useState([]);
   const currentStays = stays[activeType];
+  const displayStays = preview ? currentStays.slice(0, 3) : currentStays;
+
+  const toggleWishlist = (e, id) => {
+    e.stopPropagation();
+    setWishlist(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
 
   return (
-    <section className="hotels-section" id="stays">
-      <div className="section-wrap">
-        <FadeIn>
-          <p className="section-tag">Accommodation</p>
-          <div className="hotels-header">
-            <h2 className="section-title">Find Your Perfect <em>Stay</em></h2>
-            <div className="hotels-toggle">
-              {stayTypes.map(type => (
-                <button
-                  key={type}
-                  id={`stay-tab-${type.toLowerCase()}`}
-                  className={`hotels-toggle-btn ${activeType === type ? 'active' : ''}`}
-                  onClick={() => setActiveType(type)}
-                >
-                  {type === 'Hotels' ? '🏨' : type === 'Hostels' ? '🎒' : '🏡'} {type}
-                  {activeType === type && <motion.div className="toggle-indicator" layoutId="stayToggle" />}
-                </button>
-              ))}
-            </div>
+    <section className={`hotels-section ${embedded ? 'embedded' : ''}`} id="stays">
+      <div className={embedded ? '' : 'section-wrap'}>
+        {!embedded && (
+          <div className="hotels-header-wrap">
+            <FadeIn>
+              <p className="section-tag">Accommodation</p>
+              <div className="hotels-header">
+                <h2 className="section-title">Find Your Perfect <em>Stay</em></h2>
+                <div className="hotels-toggle">
+                  {stayTypes.map(type => (
+                    <button
+                      key={type}
+                      id={`stay-tab-${type.toLowerCase()}`}
+                      className={`hotels-toggle-btn ${activeType === type ? 'active' : ''}`}
+                      onClick={() => setActiveType(type)}
+                    >
+                      {type === 'Hotels' ? '🏨' : type === 'Hostels' ? '🎒' : '🏡'} {type}
+                      {activeType === type && <motion.div className="toggle-indicator" layoutId="stayToggle" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </FadeIn>
           </div>
-        </FadeIn>
+        )}
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -77,7 +88,7 @@ export default function HotelsStays() {
             transition={{ duration: 0.35 }}
           >
             <StaggerContainer className="hotels-grid">
-              {currentStays.map(stay => (
+              {displayStays.map(stay => (
                 <StaggerItem key={stay.id}>
                   <motion.article
                     className="hotel-card"
@@ -88,9 +99,14 @@ export default function HotelsStays() {
                     <div className="hotel-img-wrap">
                       <img src={stay.image} alt={stay.name} className="hotel-img" loading="lazy" />
                       {stay.badge && <div className="hotel-badge">{stay.badge}</div>}
-                      <button className="hotel-wishlist" aria-label="Save to wishlist">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                      
+                      <button 
+                        className="hotel-wishlist-btn" 
+                        onClick={(e) => toggleWishlist(e, stay.id)}
+                        aria-label="Save to wishlist"
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill={wishlist.includes(stay.id) ? "var(--accent-pink)" : "none"} stroke={wishlist.includes(stay.id) ? "var(--accent-pink)" : "currentColor"} strokeWidth="2">
+                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                         </svg>
                       </button>
                     </div>
@@ -137,14 +153,16 @@ export default function HotelsStays() {
           </motion.div>
         </AnimatePresence>
 
-        <FadeIn delay={0.3} className="hotels-view-all">
-          <button className="btn-ghost" id="hotels-view-all-btn">
-            View All {activeType}
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-            </svg>
-          </button>
-        </FadeIn>
+        {preview && (
+          <FadeIn delay={0.3} className="hotels-view-all">
+            <a href="/stays" className="btn-ghost" id="hotels-view-all-btn">
+              View All {activeType}
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ marginLeft: '6px' }}>
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              </svg>
+            </a>
+          </FadeIn>
+        )}
       </div>
     </section>
   );

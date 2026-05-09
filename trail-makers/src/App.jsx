@@ -1,22 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { motion, useScroll, useSpring } from 'framer-motion';
 
-// ── Landing page components ──────────────────────────────────
-import Navbar           from './components/Navbar';
-import Hero             from './components/Hero';
-import TrustBar         from './components/TrustBar';
-import Destinations     from './components/Destinations';
-import HotelsStays      from './components/HotelsStays';
-import Packages         from './components/Packages';
-import TripPlanner      from './components/TripPlanner';
-import LocalExperiences from './components/LocalExperiences';
-import Reviews          from './components/Reviews';
-import Discount         from './components/Discount';
-import Footer           from './components/Footer';
-
-// ── Authenticated app ────────────────────────────────────────
+// ── Layouts ──────────────────────────────────────────────────
+import PublicLayout    from './layouts/PublicLayout';
 import AppLayout       from './layouts/AppLayout';
+
+// ── Public Pages ─────────────────────────────────────────────
+import HomePage               from './pages/HomePage';
+import DestinationsExplorePage from './pages/DestinationsExplorePage';
+import StaysExplorePage       from './pages/StaysExplorePage';
+import ExperiencesExplorePage from './pages/ExperiencesExplorePage';
+import TripPlannerExplorePage from './pages/TripPlannerExplorePage';
+import OffersExplorePage      from './pages/OffersExplorePage';
+import AboutExplorePage       from './pages/AboutExplorePage';
+
+// ── Authenticated Pages ──────────────────────────────────────
 import DashboardPage   from './pages/DashboardPage';
 import ExplorePage     from './pages/ExplorePage';
 import LocationPage    from './pages/LocationPage';
@@ -43,16 +41,23 @@ function App() {
     setUser(null);
   };
 
-  // Guest → show full landing page
-  if (!user) {
-    return <LandingPage />;
-  }
-
-  // Authenticated → full multi-page SPA
   return (
     <Routes>
-      <Route element={<AppLayout user={user} onLogout={handleLogout} />}>
-        <Route index path="/"         element={<DashboardPage user={user} />} />
+      {/* ── Public Routes (accessible to both guests & users) ── */}
+      <Route element={<PublicLayout />}>
+        <Route index path="/"                element={<HomePage />} />
+        <Route path="/destinations"          element={<DestinationsExplorePage />} />
+        <Route path="/stays"                 element={<StaysExplorePage />} />
+        <Route path="/experiences"           element={<ExperiencesExplorePage />} />
+        <Route path="/packages"              element={<ExperiencesExplorePage />} />
+        <Route path="/trip-planner"          element={<TripPlannerExplorePage />} />
+        <Route path="/offers"                element={<OffersExplorePage />} />
+        <Route path="/about"                 element={<AboutExplorePage />} />
+      </Route>
+
+      {/* ── Authenticated Routes (only logged in users) ── */}
+      <Route element={user ? <AppLayout user={user} onLogout={handleLogout} /> : <Navigate to="/" replace />}>
+        <Route path="/dashboard"      element={<DashboardPage user={user} />} />
         <Route path="/explore"        element={<ExplorePage />} />
         <Route path="/location/:id"   element={<LocationPage />} />
         <Route path="/trek/:id"       element={<TrekDetailPage />} />
@@ -64,66 +69,10 @@ function App() {
             onUserUpdate={setUser}
           />
         } />
-        <Route path="*"               element={<Navigate to="/" replace />} />
       </Route>
+
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
-  );
-}
-
-function LandingPage() {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
-
-  return (
-    <>
-      {/* Animated scroll progress bar */}
-      <motion.div
-        style={{
-          scaleX,
-          position: 'fixed',
-          top: 0, left: 0, right: 0,
-          height: '3px',
-          background: 'linear-gradient(90deg, #f0c040, #f59e0b, #ec4899, #f0c040)',
-          backgroundSize: '200% 100%',
-          transformOrigin: '0%',
-          zIndex: 9999,
-        }}
-      />
-
-      <Navbar />
-
-      <main>
-        {/* 1. Hero — smart search + "Plan Your Perfect Trip" */}
-        <Hero />
-
-        {/* 2. Trust bar — 50K+ travelers, 10K+ stays, 4.9★ */}
-        <TrustBar />
-
-        {/* 3. Destination discovery — category tabs + horizontal cards */}
-        <Destinations />
-
-        {/* 4. Hotels & Stays — Airbnb-style grid w/ Hotels/Hostels/Homestays toggle */}
-        <HotelsStays />
-
-        {/* 5. Featured Packages — backend-connected + budget/difficulty filters */}
-        <Packages />
-
-        {/* 6. AI Smart Trip Planner */}
-        <TripPlanner />
-
-        {/* 7. Local Experiences — tours, food walks, cultural events */}
-        <LocalExperiences />
-
-        {/* 8. Testimonials carousel */}
-        <Reviews />
-
-        {/* 9. Deals & Discounts — 3 cards with countdown timers */}
-        <Discount />
-      </main>
-
-      {/* 10. Footer — TripForge branded with newsletter */}
-      <Footer />
-    </>
   );
 }
 

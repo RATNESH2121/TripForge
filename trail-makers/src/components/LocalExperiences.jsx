@@ -62,7 +62,9 @@ const Stars = ({ n }) => (
   </div>
 );
 
-export default function LocalExperiences() {
+export default function LocalExperiences({ preview = false }) {
+  const displayExp = preview ? experiences.slice(0, 3) : experiences;
+
   return (
     <section className="experiences-section" id="experiences">
       <div className="section-wrap">
@@ -88,7 +90,7 @@ export default function LocalExperiences() {
         </FadeIn>
 
         <StaggerContainer className="experiences-grid">
-          {experiences.map(exp => (
+          {displayExp.map(exp => (
             <StaggerItem key={exp.id}>
               <motion.article
                 className="exp-card"
@@ -142,12 +144,14 @@ export default function LocalExperiences() {
           ))}
         </StaggerContainer>
 
-        <FadeIn delay={0.4} className="exp-cta-wrap">
-          <p className="exp-cta-text">🌍 100% of experiences support local communities</p>
-          <button className="btn-ghost" id="exp-view-all-btn">
-            Explore All Experiences →
-          </button>
-        </FadeIn>
+        {preview && (
+          <FadeIn delay={0.4} className="exp-cta-wrap">
+            <p className="exp-cta-text">🌍 100% of experiences support local communities</p>
+            <a href="/experiences" className="btn-ghost" id="exp-view-all-btn">
+              Explore All Experiences →
+            </a>
+          </FadeIn>
+        )}
       </div>
     </section>
   );

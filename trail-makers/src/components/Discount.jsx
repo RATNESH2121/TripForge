@@ -73,8 +73,10 @@ function Countdown({ expiry }) {
   );
 }
 
-export default function Discount() {
+export default function Discount({ preview = false }) {
   const [copied, setCopied] = useState(null);
+
+  const displayDeals = preview ? deals.slice(0, 3) : deals;
 
   const copyCode = (code, id) => {
     navigator.clipboard.writeText(code).catch(() => {});
@@ -94,7 +96,7 @@ export default function Discount() {
         </FadeIn>
 
         <StaggerContainer className="deals-grid">
-          {deals.map(deal => (
+          {displayDeals.map(deal => (
             <StaggerItem key={deal.id}>
               <motion.div
                 className="deal-card"
@@ -112,8 +114,13 @@ export default function Discount() {
                 </div>
 
                 {/* Body */}
-                <div className="deal-body">
-                  <h3 className="deal-title">{deal.title}</h3>
+                <div className="deal-info">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                    <h4 className="deal-title">{deal.title}</h4>
+                    {deal.id === 1 && (
+                      <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 6px', background: 'rgba(234, 76, 137, 0.2)', color: 'var(--accent-pink)', borderRadius: '4px', textTransform: 'uppercase' }}>Only 2 left</span>
+                    )}
+                  </div>
                   <p className="deal-desc">{deal.desc}</p>
 
                   <ul className="deal-perks">
@@ -128,11 +135,15 @@ export default function Discount() {
                     <div className="deal-code-box">
                       <code className="deal-code">{deal.code}</code>
                       <button
-                        className="deal-copy-btn"
-                        id={`copy-code-${deal.id}`}
+                        className={`deal-copy-btn ${copied === deal.id ? 'copied' : ''}`}
                         onClick={() => copyCode(deal.code, deal.id)}
+                        aria-label="Copy promo code"
                       >
-                        {copied === deal.id ? '✓ Copied!' : 'Copy'}
+                        {copied === deal.id ? 'Copied!' : 'Copy Code'}
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                          <path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
                       </button>
                     </div>
                   </div>
@@ -151,6 +162,17 @@ export default function Discount() {
             </StaggerItem>
           ))}
         </StaggerContainer>
+
+        {preview && (
+          <FadeIn delay={0.4} className="deals-view-all" style={{ display: 'flex', justifyContent: 'center', marginTop: '32px' }}>
+            <a href="/offers" className="btn-ghost" id="deals-view-all-btn">
+              Explore All Offers
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ marginLeft: '6px' }}>
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              </svg>
+            </a>
+          </FadeIn>
+        )}
       </div>
     </section>
   );

@@ -19,7 +19,7 @@ const renderStars = (count) => [...Array(5)].map((_, i) => (
   <span key={i} style={{ color: i < count ? 'var(--accent-gold)' : 'rgba(255,255,255,0.15)' }}>★</span>
 ));
 
-export default function Packages() {
+export default function Packages({ preview = false }) {
   const [treks,       setTreks]       = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [apiError,    setApiError]    = useState('');
@@ -51,6 +51,8 @@ export default function Packages() {
   if (sort === 'price-asc')  data = [...data].sort((a, b) => a.price - b.price);
   if (sort === 'price-desc') data = [...data].sort((a, b) => b.price - a.price);
   if (sort === 'rating')     data = [...data].sort((a, b) => b.stars - a.stars);
+
+  const displayData = preview ? data.slice(0, 3) : data;
 
   return (
     <section className="packages-section" id="packages">
@@ -146,7 +148,7 @@ export default function Packages() {
       {!loading && !apiError && (
         <StaggerContainer className="pkg-grid">
           <AnimatePresence mode="popLayout">
-            {data.map(pkg => (
+            {displayData.map(pkg => (
               <StaggerItem key={pkg.id}>
                 <motion.article
                   layout
@@ -189,13 +191,24 @@ export default function Packages() {
             ))}
           </AnimatePresence>
 
-          {data.length === 0 && (
+          {!preview && data.length === 0 && (
             <div className="pkg-empty">
               <p>No packages match your filters.</p>
               <button onClick={() => { setSearch(''); setFilter('All'); setSort('default'); }}>Reset filters</button>
             </div>
           )}
         </StaggerContainer>
+      )}
+
+      {preview && (
+        <FadeIn delay={0.3} className="pkg-view-all" style={{ display: 'flex', justifyContent: 'center', marginTop: '40px' }}>
+          <a href="/destinations" className="btn-ghost" id="pkg-view-all-btn">
+            Explore All Packages
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ marginLeft: '6px' }}>
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+            </svg>
+          </a>
+        </FadeIn>
       )}
 
       <BookingModal

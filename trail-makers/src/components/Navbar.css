@@ -3,18 +3,19 @@
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 1000;
-  padding: 0 24px;
-  height: 70px;
+  padding: 0 32px;
+  height: 84px;
   display: flex;
   align-items: center;
-  transition: background var(--t-slow), backdrop-filter var(--t-slow), box-shadow var(--t-slow);
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .navbar.scrolled {
-  background: rgba(6, 16, 28, 0.88);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.06), 0 4px 24px rgba(0,0,0,0.4);
+  height: 64px;
+  background: rgba(6, 16, 28, 0.75);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.08), 0 8px 32px rgba(0,0,0,0.6);
 }
 
 .nav-container {
@@ -102,12 +103,12 @@
 
 .nav-dot {
   position: absolute;
-  bottom: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px; height: 4px;
-  border-radius: 50%;
-  background: var(--accent-gold);
+  bottom: 0px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
   display: block;
 }
 
