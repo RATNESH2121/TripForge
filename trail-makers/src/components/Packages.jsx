@@ -4,7 +4,8 @@ import { StaggerContainer, StaggerItem } from './animations/Stagger';
 import FadeIn from './animations/FadeIn';
 import BookingModal from './BookingModal';
 import AuthModal from './AuthModal';
-import { fetchExperiences, setToken, setUser } from '../api';
+import ImageWithFallback from './ImageWithFallback';
+import { fetchTreks, setToken, setUser } from '../api';
 import './Packages.css';
 
 const DIFFICULTIES = ['All', 'Easy', 'Moderate', 'Hard', 'Extreme'];
@@ -34,24 +35,14 @@ export default function Packages({ preview = false }) {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetchExperiences()
-      .then(data => {
-        if (!cancelled) {
-          setTreks(data.map(e => ({
-            id:         e.id,
-            title:      e.title || 'Experience',
-            location:   e.destination?.name || 'Destination',
-            price:      parseFloat(e.price),
-            image:      e.image_url || '/assets/himalayas.png',
-            duration:   `${e.duration_hours}h`,
-            difficulty: 'Moderate',
-            stars:      4,
-            badge:      e.group_size > 5 ? 'GROUP' : null,
-            featured:   false,
-            type:       'experience',
-          })));
-          setLoading(false);
-        }
+    fetchTreks()
+      .then(raw => {
+        if (cancelled) return;
+        // Handle both plain array and { data: [...] } API Resource wrapper
+        const list = Array.isArray(raw) ? raw : (raw.data ?? []);
+        // ExperienceResource already provides: title, location, image, price, difficulty, stars, badge
+        setTreks(list);
+        setLoading(false);
       })
       .catch(err => { if (!cancelled) { setApiError(err.message); setLoading(false); } });
     return () => { cancelled = true; };
@@ -61,7 +52,9 @@ export default function Packages({ preview = false }) {
   const budgetRange = BUDGETS[budget];
   let data = treks.filter(p => {
     const s = search.toLowerCase();
-    return (p.title.toLowerCase().includes(s) || p.location.toLowerCase().includes(s))
+    const title = (p.title || '').toLowerCase();
+    const loc   = (p.location || '').toLowerCase();
+    return (title.includes(s) || loc.includes(s))
       && (filter === 'All' || p.difficulty === filter)
       && (p.price >= budgetRange.min && p.price < budgetRange.max);
   });
@@ -146,9 +139,9 @@ export default function Packages({ preview = false }) {
 
       {/* Loading skeleton */}
       {loading && (
-        <div className="pkg-skeleton-grid">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="pkg-skeleton" />
+        <div className="pkg-skeleton-grid" style={{ display: 'flex', gap: '24px', padding: '10px', justifyContent: 'center' }}>
+          {[...Array(preview ? 3 : 6)].map((_, i) => (
+            <div key={i} className="pkg-skeleton" style={{ width: '350px', height: '480px', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', animation: 'pulse 2s infinite' }} />
           ))}
         </div>
       )}
@@ -165,7 +158,7 @@ export default function Packages({ preview = false }) {
       {!loading && !apiError && (
         <StaggerContainer className="pkg-grid">
           <AnimatePresence mode="popLayout">
-            {displayData.map(pkg => (
+            {displayData?.map(pkg => (
               <StaggerItem key={pkg.id}>
                 <motion.article
                   layout
@@ -174,7 +167,7 @@ export default function Packages({ preview = false }) {
                   transition={{ type: 'spring', stiffness: 300, damping: 24 }}
                 >
                   <div className="pkg-img-wrap">
-                    <img src={pkg.image} alt={pkg.title} className="pkg-img" loading="lazy" />
+                    <ImageWithFallback src={pkg.image} alt={pkg.title} className="pkg-img" />
                     <div className={`pkg-badge ${pkg.badge === 'HOT' ? 'pkg-badge--hot' : ''}`}>{pkg.badge}</div>
                     {pkg.featured && <div className="pkg-featured-flag">FEATURED</div>}
                   </div>
@@ -192,7 +185,7 @@ export default function Packages({ preview = false }) {
                     <div className="pkg-footer">
                       <div className="pkg-price">
                         <span className="price-from">From</span>
-                        <span className="price-val">${Number(pkg.price).toLocaleString()}</span>
+                        <span className="price-val">₹{Number(pkg.price).toLocaleString()}</span>
                         <span className="price-per">/ person</span>
                       </div>
                       <button className="pkg-btn" onClick={() => setSelectedPkg(pkg)}>
@@ -219,7 +212,7 @@ export default function Packages({ preview = false }) {
 
       {preview && (
         <FadeIn delay={0.3} className="pkg-view-all" style={{ display: 'flex', justifyContent: 'center', marginTop: '40px' }}>
-          <a href="/destinations" className="btn-ghost" id="pkg-view-all-btn">
+          <a href="/experiences" className="btn-ghost" id="pkg-view-all-btn">
             Explore All Packages
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ marginLeft: '6px' }}>
               <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>

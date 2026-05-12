@@ -1,35 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import FadeIn from './animations/FadeIn';
+import { fetchTestimonials } from '../api';
 import './Reviews.css';
 
-const reviews = [
-  {
-    id: 1, name: 'Priya Sharma', role: 'Solo Traveler', initials: 'PS',
-    color: '#f59e0b', rating: 5, location: 'Leh–Ladakh Circuit',
-    text: "TripForge made my solo Ladakh trip completely seamless. The hotel booking, the trekking guides — everything was connected in one place. I've never felt safer as a solo female traveler.",
-  },
-  {
-    id: 2, name: 'Marco Bianchi', role: 'Adventure Photographer', initials: 'MB',
-    color: '#3b82f6', rating: 5, location: 'Everest Base Camp',
-    text: "I've shot expeditions on every continent. TripForge's local experience hosts gave me access to spots no other platform could. The Varanasi dawn boat with Raju was once-in-a-lifetime.",
-  },
-  {
-    id: 3, name: 'Aisha Kapoor', role: 'Family Traveler', initials: 'AK',
-    color: '#ec4899', rating: 5, location: 'Coorg Homestay',
-    text: "Booked a Superhost homestay in Coorg for our family of 5. The hosts treated us like family — organic farm meals, walks through coffee plantations. My kids still talk about it!",
-  },
-  {
-    id: 4, name: 'James Thornton', role: 'Weekend Adventurer', initials: 'JT',
-    color: '#10b981', rating: 5, location: 'Manali Snow Trek',
-    text: "The AI Trip Planner was genuinely impressive. I put in my budget and 'adventure' and it gave me a Manali itinerary that was better than what I'd planned myself. Booked everything in 20 minutes.",
-  },
-  {
-    id: 5, name: 'Naina Gupta', role: 'Foodie Traveler', initials: 'NG',
-    color: '#8b5cf6', rating: 5, location: 'Old Delhi Food Walk',
-    text: "The Old Delhi Street Food Walk was the best ₹1,299 I've ever spent. Our guide knew every hidden lane and every legendary stall. I've already recommended TripForge to everyone I know.",
-  },
-];
+// Avatar colors cycled by index
+const AVATAR_COLORS = ['#f59e0b', '#3b82f6', '#ec4899', '#10b981', '#8b5cf6', '#f97316'];
 
 const Stars = ({ n }) => (
   <div className="stars">
@@ -39,10 +15,47 @@ const Stars = ({ n }) => (
   </div>
 );
 
+// Fallback static testimonials shown while API loads or if API fails
+const FALLBACK = [
+  {
+    id: 1, reviewer_name: 'Priya Sharma', reviewer_location: 'Mumbai, India',
+    content: "TripForge made my solo Ladakh trip completely seamless. The hotel booking, the trekking guides — everything was connected in one place. I've never felt safer as a solo female traveler.",
+    rating: 5, trip_type: 'Solo Trek',
+    reviewer_avatar: 'https://i.pravatar.cc/100?img=47',
+  },
+  {
+    id: 2, reviewer_name: 'Arjun Mehta', reviewer_location: 'Bangalore, India',
+    content: "Booked the Swiss Alps trek on a whim and it was the best decision of my life. The guides were knowledgeable and the views — absolutely cinematic. 10/10 will book again.",
+    rating: 5, trip_type: 'Adventure Trek',
+    reviewer_avatar: 'https://i.pravatar.cc/100?img=33',
+  },
+  {
+    id: 3, reviewer_name: 'Samantha Lee', reviewer_location: 'Singapore',
+    content: "The Tokyo food tour opened my eyes to an entirely different culinary world. Our guide was amazing — took us to spots that no tourist would ever find. Pure magic!",
+    rating: 5, trip_type: 'Food Tour',
+    reviewer_avatar: 'https://i.pravatar.cc/100?img=25',
+  },
+];
+
 export default function Reviews() {
-  const [current, setCurrent] = useState(0);
-  const [direction, setDirection] = useState(1);
+  const [testimonials, setTestimonials] = useState(FALLBACK);
+  const [current,      setCurrent]      = useState(0);
+  const [direction,    setDirection]    = useState(1);
   const timerRef = useRef(null);
+
+  // Fetch live testimonials from API
+  useEffect(() => {
+    fetchTestimonials()
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setTestimonials(data);
+          setCurrent(0);
+        }
+      })
+      .catch(() => {
+        // Keep fallback silently
+      });
+  }, []);
 
   const go = (idx) => {
     setDirection(idx > current ? 1 : -1);
@@ -50,24 +63,32 @@ export default function Reviews() {
     resetTimer();
   };
 
-  const next = () => go((current + 1) % reviews.length);
-  const prev = () => go((current - 1 + reviews.length) % reviews.length);
+  const next = () => go((current + 1) % testimonials.length);
+  const prev = () => go((current - 1 + testimonials.length) % testimonials.length);
 
   const resetTimer = () => {
     clearInterval(timerRef.current);
-    timerRef.current = setInterval(next, 6000);
+    timerRef.current = setInterval(() => {
+      setCurrent(c => (c + 1) % testimonials.length);
+    }, 6000);
   };
 
   useEffect(() => {
-    timerRef.current = setInterval(next, 6000);
+    timerRef.current = setInterval(() => {
+      setCurrent(c => (c + 1) % testimonials.length);
+    }, 6000);
     return () => clearInterval(timerRef.current);
-  }, [current]);
+  }, [testimonials.length]);
 
   const variants = {
     enter:  (d) => ({ opacity: 0, x: d > 0 ? 60 : -60, scale: 0.96 }),
     center: { opacity: 1, x: 0, scale: 1 },
     exit:   (d) => ({ opacity: 0, x: d > 0 ? -60 : 60, scale: 0.96 }),
   };
+
+  const active = testimonials[current] ?? FALLBACK[0];
+  const initials = active.reviewer_name?.split(' ').map(n => n[0]).join('').slice(0, 2) ?? '?';
+  const avatarColor = AVATAR_COLORS[current % AVATAR_COLORS.length];
 
   return (
     <section className="reviews-section">
@@ -97,7 +118,7 @@ export default function Reviews() {
 
             {/* Dots */}
             <div className="reviews-dots">
-              {reviews.map((_, i) => (
+              {testimonials.map((_, i) => (
                 <button
                   key={i}
                   id={`review-dot-${i}`}
@@ -115,7 +136,7 @@ export default function Reviews() {
                   <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                 </svg>
               </button>
-              <span className="reviews-counter">{String(current+1).padStart(2,'0')} / {String(reviews.length).padStart(2,'0')}</span>
+              <span className="reviews-counter">{String(current+1).padStart(2,'0')} / {String(testimonials.length).padStart(2,'0')}</span>
               <button className="reviews-arrow" id="review-next-btn" onClick={next} aria-label="Next review">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                   <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -141,24 +162,37 @@ export default function Reviews() {
                 {/* Quote mark */}
                 <div className="review-quote">"</div>
 
-                <Stars n={reviews[current].rating} />
+                <Stars n={active.rating} />
 
-                <p className="review-text">{reviews[current].text}</p>
+                <p className="review-text">{active.content}</p>
 
-                <div className="review-location">
-                  📍 {reviews[current].location}
-                </div>
+                {active.trip_type && (
+                  <div className="review-location">
+                    📍 {active.trip_type}
+                  </div>
+                )}
 
                 <div className="review-author">
-                  <div
-                    className="review-avatar"
-                    style={{ background: `linear-gradient(135deg, ${reviews[current].color}, ${reviews[current].color}aa)` }}
-                  >
-                    {reviews[current].initials}
-                  </div>
+                  {active.reviewer_avatar ? (
+                    <img
+                      src={active.reviewer_avatar}
+                      alt={active.reviewer_name}
+                      className="review-avatar"
+                      style={{ objectFit: 'cover', border: `2px solid ${avatarColor}` }}
+                      onError={(e) => {
+                        // Fallback to initials on avatar load failure
+                        e.target.style.display = 'none';
+                        e.target.nextSibling?.classList.remove('hidden');
+                      }}
+                    />
+                  ) : (
+                    <div className="review-avatar" style={{ background: `linear-gradient(135deg, ${avatarColor}, ${avatarColor}aa)` }}>
+                      {initials}
+                    </div>
+                  )}
                   <div>
-                    <p className="review-name">{reviews[current].name}</p>
-                    <p className="review-role">{reviews[current].role}</p>
+                    <p className="review-name">{active.reviewer_name}</p>
+                    <p className="review-role">{active.reviewer_location ?? 'Verified Traveler'}</p>
                   </div>
                   <div className="review-verified">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">

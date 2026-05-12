@@ -2,7 +2,11 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StaggerContainer, StaggerItem } from './animations/Stagger';
 import FadeIn from './animations/FadeIn';
-import { fetchStays } from '../api';
+import ImageWithFallback from './ImageWithFallback';
+import BookingModal from './BookingModal';
+import AuthModal from './AuthModal';
+import { toast } from 'react-hot-toast';
+import { fetchStays, setToken, setUser, toggleWishlist as apiToggleWishlist, getToken } from '../api';
 import './HotelsStays.css';
 
 const stayTypes = ['Hotels', 'Hostels', 'Homestays'];
@@ -20,20 +24,26 @@ export default function HotelsStays({ preview = false, embedded = false }) {
   const [allStays,   setAllStays]   = useState([]);
   const [loading,    setLoading]    = useState(true);
   const [wishlist,   setWishlist]   = useState([]);
+  const [selectedStay, setSelectedStay] = useState(null);
+  const [authOpen,     setAuthOpen]     = useState(false);
 
   useEffect(() => {
     fetchStays()
-      .then(data => {
-        setAllStays(data.map(s => ({
+      .then(raw => {
+        // Handle both plain array and { data: [...] } API Resource wrapper
+        const list = Array.isArray(raw) ? raw : (raw.data ?? []);
+        setAllStays(list.map(s => ({
           id:           s.id,
           name:         s.name,
           location:     s.location || s.destination?.name || '',
-          image:        s.image_url || '/assets/himalayas.png',
+          image:        s.image_url || '/assets/fallback_placeholder.png',
           pricePerNight: parseFloat(s.price_per_night),
           rating:       parseFloat(s.rating),
-          reviews:      Math.floor(Math.random() * 1000) + 100,
+          reviews:      s.reviews_count || 0,
           amenities:    s.amenities || [],
           type:         s.type,
+          badge:        s.badge || null,
+          featured:     s.featured || false,
         })));
         setLoading(false);
       })
@@ -52,9 +62,25 @@ export default function HotelsStays({ preview = false, embedded = false }) {
     : allStays;
   const displayStays = preview ? currentStays.slice(0, 3) : currentStays;
 
-  const toggleWishlist = (e, id) => {
+  const toggleWishlist = async (e, id) => {
     e.stopPropagation();
-    setWishlist(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+    if (!getToken()) {
+      setAuthOpen(true);
+      return;
+    }
+    
+    // Optimistic update
+    const isSaved = wishlist.includes(id);
+    setWishlist(prev => isSaved ? prev.filter(i => i !== id) : [...prev, id]);
+    
+    try {
+      await apiToggleWishlist('stay', id);
+      toast.success(isSaved ? 'Removed from wishlist' : 'Saved to wishlist');
+    } catch (err) {
+      // Revert on error
+      setWishlist(prev => isSaved ? [...prev, id] : prev.filter(i => i !== id));
+      toast.error('Failed to update wishlist');
+    }
   };
 
   return (
@@ -85,15 +111,26 @@ export default function HotelsStays({ preview = false, embedded = false }) {
         )}
 
         <AnimatePresence mode="wait">
-          <motion.div
-            key={activeType}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.35 }}
-          >
-            <StaggerContainer className="hotels-grid">
-              {displayStays.map(stay => (
+          {loading ? (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '32px', marginTop: '32px' }}
+            >
+              {[...Array(preview ? 3 : 6)].map((_, i) => (
+                <div key={i} style={{ height: '440px', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', animation: 'pulse 2s infinite' }} />
+              ))}
+            </motion.div>
+          ) : (
+            <motion.div
+              key={activeType}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.35 }}
+            >
+              <StaggerContainer className="hotels-grid">
+                {displayStays?.map(stay => (
                 <StaggerItem key={stay.id}>
                   <motion.article
                     className="hotel-card"
@@ -102,7 +139,7 @@ export default function HotelsStays({ preview = false, embedded = false }) {
                     id={`hotel-card-${stay.id}`}
                   >
                     <div className="hotel-img-wrap">
-                      <img src={stay.image} alt={stay.name} className="hotel-img" loading="lazy" />
+                      <ImageWithFallback src={stay.image} alt={stay.name} className="hotel-img" />
                       {stay.badge && <div className="hotel-badge">{stay.badge}</div>}
                       
                       <button 
@@ -143,7 +180,7 @@ export default function HotelsStays({ preview = false, embedded = false }) {
                           <span className="hotel-price-val">₹{stay.pricePerNight.toLocaleString()}</span>
                           <span className="hotel-per">/ night</span>
                         </div>
-                        <button className="hotel-btn" id={`hotel-book-${stay.id}`}>
+                        <button className="hotel-btn" id={`hotel-book-${stay.id}`} onClick={() => setSelectedStay(stay)}>
                           View Deal
                           <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
                             <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
@@ -156,6 +193,7 @@ export default function HotelsStays({ preview = false, embedded = false }) {
               ))}
             </StaggerContainer>
           </motion.div>
+          )}
         </AnimatePresence>
 
         {preview && (
@@ -168,6 +206,19 @@ export default function HotelsStays({ preview = false, embedded = false }) {
             </a>
           </FadeIn>
         )}
+
+        <BookingModal
+          isOpen={!!selectedStay}
+          onClose={() => setSelectedStay(null)}
+          packageData={selectedStay}
+          onAuthRequired={() => { setSelectedStay(null); setAuthOpen(true); }}
+        />
+
+        <AuthModal
+          isOpen={authOpen}
+          onClose={() => setAuthOpen(false)}
+          onSuccess={(u) => { setToken(u.token); setUser(u); setAuthOpen(false); }}
+        />
       </div>
     </section>
   );

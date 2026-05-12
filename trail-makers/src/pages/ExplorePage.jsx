@@ -35,24 +35,28 @@ export default function ExplorePage() {
     setLoading(true);
     Promise.all([fetchStays(), fetchExperiences()])
       .then(([staysData, expData]) => {
-        setStays(staysData.map(s => ({
-          ...s,
-          type: 'stay',
-          title: s.name,
-          price: s.price_per_night,
-          stars: Math.round(s.rating || 4),
-        })));
-        setExperiences(expData.map(e => ({
-          ...e,
-          type: 'experience',
-          title: e.title,
-          price: e.price,
-          stars: 4,
-          location: e.destination?.name || '',
-          duration: `${e.duration_hours}h`,
-          difficulty: 'Moderate',
-          image: e.image_url,
-        })));
+        if (Array.isArray(staysData)) {
+          setStays(staysData.map(s => ({
+            ...s,
+            type: 'stay',
+            title: s.name,
+            price: s.price_per_night,
+            stars: Math.round(s.rating || 4),
+          })));
+        }
+        if (Array.isArray(expData)) {
+          setExperiences(expData.map(e => ({
+            ...e,
+            type: 'experience',
+            title: e.title,
+            price: e.price,
+            stars: 4,
+            location: e.destination?.name || '',
+            duration: `${e.duration_hours}h`,
+            difficulty: 'Moderate',
+            image: e.image_url,
+          })));
+        }
         setLoading(false);
       })
       .catch(err => {
@@ -66,7 +70,7 @@ export default function ExplorePage() {
   useEffect(() => {
     const tab = searchParams.get('tab');
     if (tab && tab !== activeTab) setActiveTab(tab);
-  }, [searchParams]);
+  }, [searchParams, activeTab]);
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
@@ -84,9 +88,13 @@ export default function ExplorePage() {
 
   let filteredData = combinedData.filter(p => {
     const s = search.toLowerCase();
-    const matchesSearch = p.title.toLowerCase().includes(s) || 
-                          (p.location && p.location.toLowerCase().includes(s)) ||
-                          (p.location_slug && p.location_slug.toLowerCase().includes(s));
+    const pTitle = p.title || p.name || '';
+    const pLoc   = p.location || '';
+    const pSlug  = p.location_slug || '';
+
+    const matchesSearch = pTitle.toLowerCase().includes(s) || 
+                          pLoc.toLowerCase().includes(s) ||
+                          pSlug.toLowerCase().includes(s);
     
     const matchesFilter = activeTab === 'stays' ? true : (filter === 'All' || p.difficulty === filter);
     
@@ -110,7 +118,7 @@ export default function ExplorePage() {
       </div>
 
       {/* Category Tabs */}
-      <div className="explore-tabs" style={{ marginBottom: 32, display: 'flex', gap: 12 }}>
+      <div className="explore-tabs" style={{ marginBottom: 32, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
         {CATEGORIES.map(cat => (
           <button
             key={cat.id}
@@ -184,6 +192,21 @@ export default function ExplorePage() {
           ))}
         </div>
       )}
+      
+      {/* Error State */}
+      {!loading && error && (
+        <div style={{ textAlign: 'center', padding: '60px 20px', color: 'rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', marginTop: '20px' }}>
+          <div style={{ fontSize: '32px', marginBottom: '16px' }}>⚠️</div>
+          <p style={{ fontSize: '16px', marginBottom: '8px', color: '#fff' }}>Could not load data</p>
+          <p style={{ fontSize: '13px' }}>{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            style={{ marginTop: '20px', padding: '10px 24px', background: 'var(--accent-gold)', color: '#000', borderRadius: '999px', fontWeight: 700 }}
+          >
+            Try Again
+          </button>
+        </div>
+      )}
 
       {/* Grid */}
       {!loading && !error && (
@@ -193,11 +216,10 @@ export default function ExplorePage() {
               {filteredData.map(item => (
                 <motion.div
                   key={`${item.type}-${item.id}`}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.2 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
                 >
                   {item.type === 'stay' ? (
                     <StayCard stay={item} onClick={() => alert('Stay details coming soon!')} />

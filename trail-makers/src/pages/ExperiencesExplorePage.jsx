@@ -1,6 +1,7 @@
 import LocalExperiences from '../components/LocalExperiences';
 import Packages from '../components/Packages';
 import FadeIn from '../components/animations/FadeIn';
+import ImageWithFallback from '../components/ImageWithFallback';
 
 export default function ExperiencesExplorePage() {
   return (
@@ -33,7 +34,7 @@ export default function ExperiencesExplorePage() {
             overflow: 'hidden',
             boxShadow: 'var(--shadow-lift)'
           }}>
-            <img src="/assets/himalayas.png" alt="Featured Adventure" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <ImageWithFallback src="/assets/himalayas.png" alt="Featured Adventure" />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(6,16,28,0.95) 0%, rgba(6,16,28,0.2) 60%, transparent 100%)' }} />
             
             <div style={{ position: 'absolute', bottom: '48px', left: '48px', right: '48px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '24px' }}>

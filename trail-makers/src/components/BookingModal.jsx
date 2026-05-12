@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-hot-toast';
 import { createBooking, getToken } from '../api';
 import './BookingModal.css';
 
@@ -12,7 +13,9 @@ export default function BookingModal({ isOpen, onClose, packageData, onAuthRequi
   const [error,      setError]       = useState('');
 
   if (!isOpen || !packageData) return null;
-  const total = packageData.price * guests;
+  const isStay = packageData.pricePerNight !== undefined;
+  const basePrice = isStay ? packageData.pricePerNight : packageData.price;
+  const total = basePrice * guests;
 
   const handleClose = () => {
     setSubmitted(false); setGuests(1); setCheckIn(''); setCheckOut(''); setError(''); onClose();
@@ -31,8 +34,7 @@ export default function BookingModal({ isOpen, onClose, packageData, onAuthRequi
     setError('');
 
     try {
-      // Determine bookable_type from packageData
-      const bookableType = packageData.type === 'stay' ? 'Stay' : 'Experience';
+      const bookableType = isStay ? 'Stay' : 'Experience';
       await createBooking({
         bookable_type: bookableType,
         bookable_id:   packageData.id,
@@ -41,6 +43,8 @@ export default function BookingModal({ isOpen, onClose, packageData, onAuthRequi
         guests,
       });
       setSubmitted(true);
+      toast.success('Booking confirmed successfully!');
+
     } catch (err) {
       setError(err.message);
     } finally {
@@ -77,9 +81,9 @@ export default function BookingModal({ isOpen, onClose, packageData, onAuthRequi
                 </svg>
               </button>
               <div className="modal-hero-info">
-                <div className="modal-badge">{packageData.difficulty}</div>
-                <h2 className="modal-title">{packageData.title}</h2>
-                <p className="modal-sub">📍 {packageData.location} &nbsp;·&nbsp; 🕐 {packageData.duration}</p>
+                <div className="modal-badge">{isStay ? packageData.type : packageData.difficulty}</div>
+                <h2 className="modal-title">{isStay ? packageData.name : packageData.title}</h2>
+                <p className="modal-sub">📍 {packageData.location} {!isStay && ` ·  🕐 ${packageData.duration}`}</p>
               </div>
             </div>
           </div>
@@ -94,8 +98,8 @@ export default function BookingModal({ isOpen, onClose, packageData, onAuthRequi
               >
                 <div className="success-icon">✓</div>
                 <h3>Booking Confirmed!</h3>
-                <p>Your adventure to <strong>{packageData.title}</strong> is secured. Check your email for the itinerary.</p>
-                <button className="btn-success-close" onClick={handleClose}>Back to Packages</button>
+                <p>Your booking for <strong>{isStay ? packageData.name : packageData.title}</strong> is secured. Check your email for details.</p>
+                <button type="button" className="btn-success-close" onClick={handleClose}>Back</button>
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="modal-form">
@@ -137,8 +141,8 @@ export default function BookingModal({ isOpen, onClose, packageData, onAuthRequi
                 <div className="modal-footer">
                   <div className="total-price">
                     <span className="total-label">Total</span>
-                    <span className="total-val">${total.toLocaleString()}</span>
-                    <span className="total-note">({guests} {guests === 1 ? 'guest' : 'guests'} × ${Number(packageData.price).toLocaleString()})</span>
+                    <span className="total-val">₹{total.toLocaleString()}</span>
+                    <span className="total-note">({guests} {guests === 1 ? 'guest' : 'guests'} × ₹{Number(basePrice).toLocaleString()})</span>
                   </div>
                   <button type="submit" className="btn-confirm" disabled={loading}>
                     {loading ? (

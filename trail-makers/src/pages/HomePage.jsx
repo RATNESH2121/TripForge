@@ -18,29 +18,41 @@ export default function HomePage() {
       <TrustBar />
 
       {/* 3. Destination discovery (Preview) */}
-      <div style={{ marginTop: '40px' }}>
+      <div style={{ margin: '80px 0' }}>
         <Destinations preview={true} />
       </div>
 
       {/* 4. Hotels & Stays (Preview) */}
-      <HotelsStays preview={true} />
+      <div style={{ margin: '80px 0' }}>
+        <HotelsStays preview={true} />
+      </div>
 
       {/* 5. Featured Packages (Preview) */}
-      <Packages preview={true} />
+      <div style={{ margin: '80px 0' }}>
+        <Packages preview={true} />
+      </div>
 
       {/* 6. AI Smart Trip Planner */}
-      <TripPlanner />
+      <div style={{ margin: '80px 0' }}>
+        <TripPlanner />
+      </div>
 
       {/* 7. Local Experiences (Preview) */}
-      <LocalExperiences preview={true} />
+      <div style={{ margin: '80px 0' }}>
+        <LocalExperiences preview={true} />
+      </div>
 
       {/* 8. Testimonials carousel */}
-      <Reviews />
+      <div style={{ margin: '80px 0' }}>
+        <Reviews />
+      </div>
 
       {/* 9. Deals & Discounts (Preview) */}
-      <div style={{ marginBottom: '40px' }}>
+      <div style={{ margin: '80px 0 120px' }}>
         <Discount preview={true} />
       </div>
     </div>
   );
 }
+
+

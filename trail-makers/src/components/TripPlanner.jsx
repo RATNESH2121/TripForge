@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import FadeIn from './animations/FadeIn';
 import { generateTripPlan } from '../api';
 import './TripPlanner.css';
@@ -13,6 +14,7 @@ const moods = [
 const BUDGET_LABELS = ['Budget', 'Moderate', 'Luxury'];
 
 export default function TripPlanner() {
+  const navigate = useNavigate();
   const [selectedMood, setSelectedMood] = useState('Adventure');
   const [budgetIdx,    setBudgetIdx]    = useState(1); // 0=Budget,1=Moderate,2=Luxury
   const [days,         setDays]         = useState(7);
@@ -186,7 +188,7 @@ export default function TripPlanner() {
                       <div className="plan-info"><span>💰</span> ₹{Number(plan.estimated_budget).toLocaleString()}</div>
                     )}
                   </div>
-                  <button className="btn-primary" id="book-this-plan-btn" style={{ fontSize: '13px', padding: '11px 22px' }}>
+                  <button className="btn-primary" id="book-this-plan-btn" style={{ fontSize: '13px', padding: '11px 22px' }} onClick={() => navigate('/experiences')}>
                     Book This Plan →
                   </button>
                 </div>

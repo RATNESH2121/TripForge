@@ -11,7 +11,9 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'avatar'];
+    protected $fillable = [
+        'name', 'email', 'password', 'role', 'avatar', 'phone', 'bio', 'location',
+    ];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -23,6 +25,18 @@ class User extends Authenticatable
         ];
     }
 
+    // ─── Roles ──────────────────────────────────────────────────
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isModerator(): bool
+    {
+        return in_array($this->role, ['admin', 'moderator']);
+    }
+
+    // ─── Relationships ──────────────────────────────────────────
     public function bookings()
     {
         return $this->hasMany(Booking::class);
@@ -31,6 +45,16 @@ class User extends Authenticatable
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
     }
 
     public function hostedStays()

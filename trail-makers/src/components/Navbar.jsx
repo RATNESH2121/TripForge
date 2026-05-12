@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import AuthModal from './AuthModal';
+import { toast } from 'react-hot-toast';
 import { getUser, removeToken, removeUser, authLogout } from '../api';
 import './Navbar.css';
 
@@ -13,6 +14,10 @@ const navLinks = [
   { label: 'Trip Planner', href: '/trip-planner' },
   { label: 'Offers',       href: '/offers' },
   { label: 'About',        href: '/about' },
+];
+
+const authenticatedLinks = [
+  { label: 'Dashboard', href: '/dashboard' },
 ];
 
 export default function Navbar() {
@@ -38,6 +43,7 @@ export default function Navbar() {
   const handleLogout = async () => {
     try { await authLogout(); } catch (_) {}
     removeToken(); removeUser(); setUser(null); setUserMenu(false);
+    toast.success('Logged out successfully');
   };
 
   return (
@@ -67,7 +73,7 @@ export default function Navbar() {
 
           {/* Desktop Links */}
           <ul className={`nav-links ${menuOpen ? 'open' : ''}`}>
-            {navLinks.map(({ label, href }) => {
+            {[...navLinks, ...(user ? authenticatedLinks : [])].map(({ label, href }) => {
               const isActive = location.pathname === href;
               return (
                 <li key={label}>
@@ -112,6 +118,12 @@ export default function Navbar() {
                     >
                       <p className="user-dropdown-name">{user.name}</p>
                       <p className="user-dropdown-email">{user.email}</p>
+                      <Link to="/dashboard" className="user-dropdown-item" onClick={() => setUserMenu(false)}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                          <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" fill="currentColor"/>
+                        </svg>
+                        Personal Dashboard
+                      </Link>
                       <hr className="user-dropdown-divider" />
                       <button className="user-dropdown-item" onClick={handleLogout}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none">

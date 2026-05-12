@@ -53,7 +53,7 @@ export default function About() {
               viewport={{ once: true, margin: '-80px' }}
               transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             >
-              <img src="/assets/traveler.png" alt="Traveler on cliff" className="about-img" />
+              <img src="/assets/traveler.png" alt="Traveler on cliff" className="about-img" loading="lazy" />
               <motion.div
                 className="about-float-tag"
                 animate={{ y: [0, -8, 0] }}
@@ -104,7 +104,7 @@ export default function About() {
             {team.map((member) => (
               <StaggerItem key={member.name} className="team-card">
                 <div className="team-img-wrap">
-                  <img src={member.img} alt={member.name} />
+                  <img src={member.img} alt={member.name} loading="lazy" />
                   <div className="team-overlay" />
                 </div>
                 <div className="team-info">

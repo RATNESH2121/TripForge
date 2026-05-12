@@ -31,7 +31,7 @@ export default function Hero() {
           src="/assets/hero_mountain.png"
           alt="Cinematic mountain landscape"
           className="hero-bg-img"
-          style={{ y: bgY }}
+          style={{ y: bgY, objectFit: 'cover' }}
           initial={{ scale: 1.1, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
@@ -46,9 +46,9 @@ export default function Hero() {
         {/* Badge */}
         <motion.div
           className="hero-badge"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.7 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
         >
           <span className="hero-badge-dot" />
           ✈️ &nbsp;Over 50,000 travelers trust TripForge
@@ -60,9 +60,9 @@ export default function Hero() {
             <motion.span
               key={line}
               className={`hero-word ${i === 1 ? 'hero-word--accent' : ''}`}
-              initial={{ opacity: 0, y: 60, skewY: 4 }}
-              animate={{ opacity: 1, y: 0, skewY: 0 }}
-              transition={{ delay: 0.5 + i * 0.2, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 + i * 0.1, duration: 0.6 }}
             >
               {line}
             </motion.span>
@@ -71,9 +71,9 @@ export default function Hero() {
 
         <motion.p
           className="hero-subtitle"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.95, duration: 0.8 }}
+          transition={{ delay: 0.45, duration: 0.5 }}
         >
           Discover stays, treks, local experiences & travel packages — all in one place
         </motion.p>
@@ -82,9 +82,9 @@ export default function Hero() {
         <motion.form
           className="search-bar"
           onSubmit={handleSearch}
-          initial={{ opacity: 0, y: 30, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ delay: 1.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.6 }}
           id="hero-search-form"
         >
           {searchFields.map(({ id, icon, placeholder, type }, idx) => (
@@ -119,7 +119,7 @@ export default function Hero() {
           className="hero-tags"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.4, duration: 0.6 }}
+          transition={{ delay: 0.8, duration: 0.4 }}
         >
           <span className="tags-label">Popular:</span>
           {popularTags.map(tag => (
@@ -133,18 +133,18 @@ export default function Hero() {
       {/* ── Floating Deal Card ── */}
       <motion.div
         className="hero-deal-card"
-        initial={{ opacity: 0, x: 60 }}
+        initial={{ opacity: 0, x: 30 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 1.5, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ delay: 0.9, duration: 0.6 }}
       >
         <div className="deal-card-badge">🔥 Hot Deal</div>
-        <img src="/assets/himalayas.png" alt="Everest Base Camp" className="deal-card-img" />
+        <img src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=400&q=80" alt="Everest Base Camp" className="deal-card-img" style={{ objectFit: 'cover' }} loading="lazy" />
         <div className="deal-card-body">
           <p className="deal-card-name">Everest Base Camp</p>
           <p className="deal-card-loc">📍 Nepal</p>
           <div className="deal-card-price">
-            <span className="deal-old">$4,200</span>
-            <span className="deal-new">$3,500</span>
+            <span className="deal-old">₹85,000</span>
+            <span className="deal-new">₹65,000</span>
           </div>
         </div>
       </motion.div>
@@ -154,7 +154,7 @@ export default function Hero() {
         className="scroll-indicator"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 2, duration: 0.8 }}
+        transition={{ delay: 1.2, duration: 0.5 }}
       >
         <div className="scroll-mouse">
           <div className="scroll-wheel" />
